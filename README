@@ -1,0 +1,28 @@
+== What is YAMCAT? ==
+
+YAMCAT is a user friendly database for geographic metadata running on a simple Apache webserver with PHP and mySQL.
+
+
+== What can YAMCAT do for me? ==
+
+* Spider through a given directory on the filesystem and find all XML metadata from ArcGIS for vector shapes and raster files. Then parse them into the database, with title, abstract, purpose, geographic extent and originator. 
+
+* Let users register, log in and fill out contact information. They can enter metadata with linkage to the ressource in a convenient online form.
+
+* Harvest metadata from peers using GetRecords request of the OGC/CSW protocol. ISO 19139 metadata will also be parsed to records in the database, some errors will automatically be fixed.
+
+* Give our user a nice and proper user interface for browsing for metadata by title, category or a simple point on a map.
+
+
+== How to install YAMCAT? ==
+
+You only need a simple webspace with Apache/PHP/mySQL in current versions, no Tomcat/Java/XSLT crap required.
+
+* Get the files from github and upload them to your server. 
+
+* Create a user yamcat with own database with your phpMyAdmin, then apply the yamcat.sql to it.
+
+* Set write permissions for webserver to /files directory.
+
+* Go through the few options documented in the config.php and start your website.
+ 
