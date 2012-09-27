@@ -1,0 +1,227 @@
+<?php
+// 
+// name: details.php
+//
+// coder: moenk
+//
+// purpose: shows details of a record, param is the uuid - owner/username checked for edit/delete
+//
+
+session_start();											// needed for checking logged in username, no dbauth, this is public!
+$username=$_SESSION['username'];							// used later for owner-checking
+
+include "conf/config.php";
+include "connect.php";
+require_once "bbcode.php";
+
+$uuid=trim(mysql_real_escape_string($_REQUEST['uuid']));	// part of the insert, also displayed later!
+$sql="SELECT *, m.id as meta_id FROM metadata as m left join peers as p on (m.peer_id=p.id) where m.uuid='".$uuid."';";
+$result = mysql_query($sql);
+$row = mysql_fetch_assoc($result);
+$title=$row["title"];
+// owner is used here for display, used for compare user/owner (buttons), also needed later as "foreign key" for user contacts
+$owner=mysql_real_escape_string($row['username']); 	
+// needed to check if format is a website
+$format = trim(stripslashes($row["format"]));
+$linkage=trim($row["linkage"]);
+
+if (strlen($title)>40) $title=substr($title,0,40)."...";
+$title = htmlspecialchars(stripslashes($title));
+$subtitle=htmlspecialchars(stripslashes($row["name"]));
+if ($subtitle=="") $subtitle=$row["category"];
+
+include("header.php");
+include("navigation.php");
+include("main1.php");
+?>
+
+<div class="ym-grid linearize-level-1">
+<article class="ym-g50 ym-gl">
+<div class="ym-gbox-left">
+<?php
+print "<h3>Citation</h3>";
+print "<table>\n";
+print "<tr>";
+  $title=stripslashes($row["title"]);
+  print "<tr><td width=\"38%\">Title</td><td><b>".htmlspecialchars($title)."</b></td></tr>";
+  $pubdate = stripslashes($row["pubdate"]);
+  print "<tr><td>Publication</td><td>".date("Y-m-d",strtotime($pubdate))."</td></tr>";
+  $category=stripslashes($row["category"]);
+  print "<tr><td width=\"38%\">Category</td><td><b>".htmlspecialchars($category)."</b></td></tr>";
+  $abstract = stripslashes($row["abstract"]);
+  print "<tr><td>Abstract</td><td>".make_clickable(htmlspecialchars($abstract))."</td></tr>";
+  $purpose = stripslashes($row["purpose"]);
+  print "<tr><td>Purpose</td><td>".make_clickable(htmlspecialchars($purpose))."</td></tr>";
+  $keywordtext="";
+  $keywords = explode(",",$row["keywords"]);	// make keywords clickable, nice feature!
+  foreach ($keywords as $keyword) {
+    $keyword=trim($keyword);
+	if ($keyword!="") $keywordtext.="<a href=\"results.php?keyword=".urlencode($keyword)."\">".$keyword."</a>, ";
+  }
+  
+  $keywordtext=substr($keywordtext,0,-2);
+  print "<tr><td>Keywords</td><td>".$keywordtext."</td></tr>";
+  
+  $denominator = stripslashes($row["denominator"]);
+  print "<tr><td>Denominator</td><td>".$denominator."</td></tr>";
+  
+  $thumbnail = stripslashes($row["thumbnail"]);
+  print "<tr><td>Thumbnail</td><td>\n";
+  if ($thumbnail!="") {
+	print "<a href=\"".$thumbnail."\" rel=\"lightbox\" title=\"".htmlspecialchars($title)."\"><img src=\"".$thumbnail."\" border=\"0\" width=\"150\"></a>\n";
+  }
+  if (($websnaprkey!="") && ($format=='website') && ($thumbnail=="")) {
+    print "<script type=\"text/javascript\">wsr_snapshot('".$linkage."', '".$websnaprkey."', 's');</script>\n";
+  }
+  print "</td></tr>\n";
+  
+  print "</tr>\n";
+print "</table>\n";
+
+print "<h3>Originator</h3>";
+print "<table>\n";
+$organisation = stripslashes($row["organisation"]);
+print "<tr><td width=\"38%\">Organisation</td><td><b>".htmlspecialchars($organisation)."</b></td></tr>";
+$individual = stripslashes($row["individual"]);
+print "<tr><td>Individual</td><td>".htmlspecialchars($individual)."</td></tr>";
+$city = stripslashes($row["city"]);
+print "<tr><td>City</td><td>".htmlspecialchars($city)."</td></tr>";
+$uselimitation = stripslashes($row["uselimitation"]);
+print "<tr><td>Usage limitation</td><td>".make_clickable(htmlspecialchars($uselimitation))."</td></tr>";
+print "</tr>";
+print "</table>\n";
+?>
+</div>
+</article>
+
+<article class="ym-g50 ym-gr">
+<div class="ym-gbox">
+<h3>
+Action
+</h3>
+<?php
+$id=intval($row["meta_id"]);
+$westbc = floatval($row["westbc"]);
+$southbc = floatval($row["southbc"]);
+$eastbc = floatval($row["eastbc"]);
+$northbc = floatval($row["northbc"]);
+$bbox="[".$westbc.",".$southbc.",".$eastbc.",".$northbc."]";
+$wms=trim($row["wms"]);
+if ($wms!="") {
+  print "<a rel=\"nofollow\" class=\"ym-button ym-play\" href=\"wms.php?url=".urlencode($wms)."&bbox=".$bbox."\">Web Map</a>\n";
+}
+if ($format=="website") {
+  print "<a rel=\"nofollow\" target=\"_blank\" class=\"ym-button ym-play\" href=\"".$linkage."\">Web Site</a>\n";
+}
+if ((($username!="") && ($username==$owner)) or $username=="admin") {
+	print "<a rel=\"nofollow\" href=\"edit.php?id=".$id."\" class=\"ym-button ym-edit\">Edit</a>";
+	print "<a rel=\"nofollow\" href=\"delete.php?id=".$id."\" class=\"ym-button ym-delete\">Delete</a>";
+}
+?>
+<h3>
+Geographic Extent
+</h3>
+<p>
+<div id="map" style="width:460px;height:320px;"></div>		
+<script src="external/OpenLayers/lib/OpenLayers.js"></script>
+<script type="text/javascript">
+<!--
+/*
+            var lon = 5;
+            var lat = 40;
+            var zoom = 1;
+*/
+            var map;
+			map = new OpenLayers.Map({
+        div: "map",
+    });
+
+	var mapnik = new OpenLayers.Layer.OSM("OpenStreetMap");
+			  
+  var box_extents = [
+//                [-10, 50, 5, 60],
+                //[-75, 41, -71, 44],
+//                [-6066037.5639, -6066037.5639, 4422345.7079, 4422345.7079],
+                <?php print $bbox; ?>
+            ];				  
+				
+  var boxes  = new OpenLayers.Layer.Vector( "Boxes" );
+    
+                for (var i = 0; i < box_extents.length; i++) {
+                    ext = box_extents[i];
+                    bounds = OpenLayers.Bounds.fromArray(ext)
+															.transform(  
+      new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+      new OpenLayers.Projection("EPSG:900913") // to Spherical Mercator Projection
+    )
+;
+                    
+                    box = new OpenLayers.Feature.Vector(bounds.toGeometry()
+					);
+                    boxes.addFeatures(box);
+                }
+
+                map.addLayers([mapnik,boxes]);
+				map.zoomToExtent(bounds);
+// -->
+</script>
+<?php print "<center>".$bbox."</center>"; ?>
+</p>
+
+<?php
+print "<h3>Distribution</h3>";
+print "<table>\n";
+
+print "<tr><td>UUID</td><td>".$uuid."</td></tr>\n";
+print "<tr><td>Format</td><td>".$format."</td></tr>\n";
+
+$grs = trim(stripslashes($row["grs"]));
+if (substr($grs,0,5)=="EPSG:") {
+  $grs="<a rel=\"nofollow\" target=\"epsg\" href=\"http://spatialreference.org/ref/epsg/".substr($grs,5)."/\">".$grs."</a>\n";
+}
+print "<tr><td width=\"38%\">GRS</td><td>".$grs."</td></tr>\n";
+
+print "<tr><td>Linkage</td><td>";
+$linkages=explode(" ",$row["linkage"]);
+foreach ($linkages as $linkage) {
+  print make_clickable($linkage)."<br>";
+}
+print "</td></tr>\n";
+
+$source = trim(stripslashes($row["source"]));
+print "<tr><td>Source</td><td><a href=\"".$domainroot.$source."\">".basename($source)."</a></td></tr>\n";
+mysql_free_result($result);
+
+if (($showcontact==1) or ($username=="admin")) {
+  print "</table>\n";
+  $result = mysql_query("SELECT * FROM users WHERE username = '".$owner."' ");
+  $row = mysql_fetch_assoc($result);
+  print "<h3>Metadata contact</h3>\n";
+  print "<table>\n";
+  $cntper = stripslashes($row["name"]." ".$row["surname"]);
+  print "<tr><td width=\"38%\">Person</td><td><b>".$cntper."</b></td></tr>";
+  $cntorg = stripslashes($row["organisation"]);
+  print "<tr><td>Organisation</td><td>".$cntorg."</td></tr>";
+  $cntaddress = stripslashes($row["address"]);
+  print "<tr><td>Adresss</td><td>".$cntaddress."</td></tr>";
+  $cntcity = stripslashes($row["zip"]." ".$row["city"]);
+  print "<tr><td>Phone</td><td>".$cntcity."</td></tr>";
+  $cntemail = make_clickable(stripslashes($row["email"]));
+  print "<tr><td>E-Mail</td><td>".$cntemail."</td></tr>";
+  print "</tr>";
+  mysql_free_result($result);
+} else {
+  print "<tr><td>Editor</td><td><b><a href=\"results.php?username=".$owner."\">".$owner."</a></b></td></tr>\n";
+}
+
+print "</table>\n";
+?>
+
+</div>
+</article>
+</div>		
+		
+<?php
+include("main2.php");
+include "footer.php";
+?>
