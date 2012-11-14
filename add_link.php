@@ -11,6 +11,7 @@ include "navigation.php";
 include "main1.php";
 
 include("connect.php");
+include("popup.php");
 
 function create_guid($namespace = '') {    
     static $guid = '';
@@ -42,7 +43,7 @@ Enter website URL
 </h3>
 <form class="ym-form" action="insert.php" method="post" class="ym-form linearize-form" role="application" >
 <div class="ym-fbox-text">
-<label for="linkage">Website URL</label></td>
+<label for="linkage">Website URL<?php popuphelp("website"); ?></label>
 <input name="linkage" maxlength="127" type="text" value="http://">
 </div>
 

@@ -1,6 +1,7 @@
 <?php
 include "conf/config.php";
 require_once "dbauth.php";
+require_once "bbcode.php";
 $username=$_SESSION['username'];
 if ($username!='admin') die();
 
@@ -63,8 +64,8 @@ if (mysql_num_rows($result) == 0) {
     $name = stripslashes($row["username"]);
     $email = stripslashes($row["email"]);
     $anzahl = intval($row["anzahl"]);
-    print "<td>".$name."</td>";
-    print "<td>".$email."</td>";
+    print "<td>".htmlspecialchars($name)."</td>";
+    print "<td>".make_clickable($email)."</td>";
 	print "<td><a class=\"ym-button ym-next\" href=\"results.php?username=".$name."\">".$anzahl."</a></td>";
     print "<td>";
 	print "<a class=\"ym-button ym-delete\" href=\"users.php?action=delete&name=".$name."\">Delete</a>";

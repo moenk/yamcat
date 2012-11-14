@@ -3,19 +3,20 @@ $url=$_REQUEST['url'];
 if ($url=="") die();
 $bbox=$_REQUEST['bbox'];
 if ($bbox=="") die();
-if (strpos($url,"?")==false) $url.="?REQUEST=GetCapabilities&SERVICE=WMS";
-// print $url;
+// fix missing "?" and add params to be sure they are there
+if (strpos($url,'?')==false) $url.="?";
+$url.="&SERVICE=WMS&REQUEST=GetCapabilities";
 $xml = file_get_contents($url);
 $xml=str_replace('xlink:','xlink_',$xml);
 $xml = simplexml_load_string($xml);
 // print "<pre>"; print_r($xml); die();
+include "conf/config.php";
 $title=(string)$xml->ServiceException;
-if ($title=="") $title=(string)$xml->Service->Name;
-$subtitle=(string)$xml->Service->Title;
+if ($title=="") $title=(string)$xml->Service->Title;
+$subtitle="";
 $attribution=(string)$xml->Service->AccessConstraints;
 $layers=$xml->Capability->Layer->Layer;
 $getmapurl=(string)$xml->Capability->Request->GetMap->DCPType->HTTP->Get->OnlineResource[xlink_href];
-
 include "header.php";
 include "navigation.php";
 ?>
@@ -28,11 +29,13 @@ include "navigation.php";
 	function init(){
 		var map = new OpenLayers.Map({
 			div: "map-id",
-			controls: []
+			controls: [],
+			numZoomLevels : 20,
+			fractionalZoom: true,
+			projection: new OpenLayers.Projection("EPSG:4326") // every layer should be able to do this
 		});
 		map.addControl(new OpenLayers.Control.Navigation());
 		map.addControl(new OpenLayers.Control.PanZoomBar());
-		map.addControl(new OpenLayers.Control.LayerSwitcher());
 		map.addControl(new OpenLayers.Control.Attribution());
         var baselayer = new OpenLayers.Layer.WMS( 
 			"OpenLayers WMS",
@@ -40,6 +43,9 @@ include "navigation.php";
 			{layers: 'basic'},
 			{attribution: "<?php print $attribution; ?>"} // one should fit for all 
 		);
+		var myLayerSwitcher = new OpenLayers.Control.LayerSwitcher(); 
+		map.addControl(myLayerSwitcher);
+		myLayerSwitcher.maximizeControl();
 <?php
 if ($getmapurl=="") $getmapurl=substr($url,0,strpos($url,'?'));
 $layernummer=1;

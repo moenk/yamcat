@@ -301,8 +301,10 @@ if ($northbc>90) $northbc=90;
 if ($southbc<-90) $southbc=-90;
 $area=bbox2area($northbc,$westbc,$southbc,$eastbc);
 
-// which format? prefer iso 19115 first
-$format=(string)$xml->gmd_distributionInfo->gmd_MD_Distribution->gmd_distributionFormat->gmd_MD_Format->gmd_name;
+// which format? prefer iso 19139 first
+$formats=$xml->xpath('//gmd_distributionInfo/gmd_MD_Distribution/gmd_transferOptions/gmd_MD_DigitalTransferOptions/gmd_onLine/gmd_CI_OnlineResource/gmd_function/gmd_CI_OnLineFunctionCode');
+$format=ucwords($formats[0]['codeListValue']);
+if ($format=="") $format=(string)$xml->gmd_distributionInfo->gmd_MD_Distribution->gmd_distributionFormat->gmd_MD_Format->gmd_name;
 if ($format=="") $format=(string)$xml->distInfo->distFormat->formatName;  // ArcGIS
 if ($format=="") $format=(string)$xml->distInfo->distributor->distorFormat->formatName; // ArcGIS 9.3 FGDC
 if ($format=="") $format=(string)$xml->dc_format; // DC

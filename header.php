@@ -29,6 +29,7 @@
 	<script src="external/lightbox/js/jquery-1.7.2.min.js"></script>
 	<script src="external/lightbox/js/lightbox.js"></script>
 	<link href="external/lightbox/css/lightbox.css" rel="stylesheet" />
+	<script type="text/javascript" src="popup.js"></script>
 
 	<?php 
 	if ($googleanalytics!="") {
@@ -41,10 +42,12 @@
 		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
 		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 		})();
-		</script>";
+		</script>
+		";
 	}
 	?>
 </head>
+
 <body>
 <ul class="ym-skiplinks">
 	<li><a class="ym-skip" href="#nav">Skip to navigation (Press Enter)</a></li>
@@ -59,7 +62,5 @@
 <h2><?php print $subtitle; ?></h2>
 		</div>
 	</div>
-
-	
-	
 </header>
+

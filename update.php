@@ -46,7 +46,7 @@ $grs = trim(mysql_real_escape_string($_POST["grs"]));
 
 if (($username==$owner) or ($username=="admin")) {
 	// update only fields user are allowed to change, no uuid, no owner!
-	$sql="UPDATE metadata SET title = '$title', pubdate = '$pubdate', category = '$category', abstract = '$abstract', purpose = '$purpose',  individual = '$individual', organisation = '$organisation', city = '$city', keywords = '$keywords', denominator = '$denominator',  thumbnail = '$thumbnail', uselimitation = '$uselimitation', westbc = '$westbc', southbc = '$southbc', eastbc = '$eastbc', northbc = '$northbc',area = '$area', linkage = '$linkage', format = '$format' WHERE id = '$id' ";
+	$sql="UPDATE metadata SET title = '$title', pubdate = '$pubdate', category = '$category', abstract = '$abstract', purpose = '$purpose',  individual = '$individual', organisation = '$organisation', city = '$city', keywords = '$keywords', denominator = '$denominator',  thumbnail = '$thumbnail', uselimitation = '$uselimitation', westbc = '$westbc', southbc = '$southbc', eastbc = '$eastbc', northbc = '$northbc',area = '$area', linkage = '$linkage', grs = '$grs', format = '$format' WHERE id = '$id' ";
 	$result = mysql_query($sql);
 
 	if($result) { 

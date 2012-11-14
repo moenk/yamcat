@@ -3,8 +3,8 @@ include "dbauth.php";
 $username=$_SESSION['username'];
 
 $subtitle=$title;
-$title="Upload ArcGIS metadata XML file";
-include "eader.php";
+$title="Upload shapes and raster as ZIP archive";
+include "header.php";
 include "navigation.php";
 include "main1.php";
 ?>
@@ -14,27 +14,28 @@ include "main1.php";
 <div class="ym-gbox-left">
 
 <h3>
-ArcCatalog Metadata Upload
+<?php print $title; ?>
 </h3>
 
 <p>
-Prepare metadata right in ArcCatalog for your shapes and raster data. Set options to ISO 19139 and automatic metadata updates in ArcCatalog. Then upload the XML file here.
+Prepare your shape or raster in ArcGIS and use ArcCatalog for adding meta information.
 </p>
-
 <p>
-<form enctype="multipart/form-data" action="arcgis.php" method="POST" class="ym-form linearize-form" role="application" >
-Choose an ArcGIS XML metadata file to upload: <input name="uploadedfile" type="file" /><br />
-<input type="submit" value="Upload File" />
-</form>
+Note: Set options to ISO 19139 and automatic metadata updates in ArcCatalog. 
 </p>
 
 </div>
 </article>
 <article class="ym-g62 ym-gr"> 
 <div class="ym-gbox">
+
 <p>
-<img src="http://i.imgur.com/SQ4sM.png">
+<form enctype="multipart/form-data" action="upload.php" method="POST" class="ym-form linearize-form" role="application" >
+Choose an ArcGIS XML metadata file to upload: <input name="uploadedfile" type="file" /><br />
+<input type="submit" value="Upload File" />
+</form>
 </p>
+
 </div>
 </article>
 </div>

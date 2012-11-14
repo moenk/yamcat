@@ -38,7 +38,8 @@ $grs = trim(mysql_real_escape_string($_POST["grs"]));
 $linkage=trim($_POST["linkage"]);
 if (($linkage!="") && ($title=="")) {
     print "<h3>Dublin Core Metadata extracted from website</h3>";	
-	$format="website";
+	$format="Website";
+	// check if we have a website with this UUID already
 	$uuid=md5($linkage);
 	$sql="select uuid, username from metadata where `uuid`='".$uuid."';";
 	$result = mysql_query($sql);
@@ -46,24 +47,36 @@ if (($linkage!="") && ($title=="")) {
 	$owner = stripslashes($row["username"]);
     if ($owner!="") {
 		print "<p>Website already submitted by ".$owner."</p>\n";
+		// set title empty so it won't be inserted
 		$title="";
-		$uuid="";		// so it won't be inserted
+		$uuid="";		
 	} else {
-		$tags = get_meta_tags($linkage);
-		$title=mysql_real_escape_string(html_entity_decode($tags['dc_title']));
-		if ($title=="") {
-			$urlContents = file_get_contents($linkage);
-			$dom = new DOMDocument();
-			@$dom->loadHTML($urlContents);
-			$titleobj = $dom->getElementsByTagName('title');
-			$title=mysql_real_escape_string(html_entity_decode(trim($titleobj->item(0)->nodeValue)));
+		// first retrieve the title and newsfeed 
+		$title="";
+		$newsfeed="";
+		$urlContents = file_get_contents($linkage);
+		$dom = new DOMDocument;            // init new DOMDocument
+		$dom->loadHTML($urlContents);      // load HTML into it
+		$xpath = new DOMXPath($dom);       // create a new XPath
+		$nodes = $xpath->query('//title'); // Find all title elements in document
+		foreach ($nodes as $node) $title=mysql_real_escape_string($node->nodeValue); // title text
+		$nodes = $xpath->query('//link[@type="application/rss+xml"]/@href');
+		foreach ($nodes as $node) $newsfeed=mysql_real_escape_string($node->nodeValue); // newsfeed text
+		if ($newsfeed!="") {
+		  $format="Newsfeed";
+		  $linkage=$newsfeed;
 		}
 		print "<table>\n";
+		print "<tr><td>title</td><td>$title</td></tr>\n";
+		print "<tr><td>newsfeed</td><td>$newsfeed</td></tr>\n";
+		// now the normal method
+		$tags = get_meta_tags($linkage);
 		foreach($tags as $key => $value) { 
 		  print "<tr><td>".htmlspecialchars($key)."</td><td>".htmlspecialchars($value)."</td></tr>\n";
 		}
 		print "</table>\n";
 		$individual=mysql_real_escape_string(html_entity_decode($tags['author']));
+		if ($title=="") $title=mysql_real_escape_string(html_entity_decode($tags['dc_title']));
 		if ($individual=="") $individual=mysql_real_escape_string(html_entity_decode($tags['dc_creator']));
 		if ($organisation=="") $organisation=mysql_real_escape_string(html_entity_decode($tags['dc_publisher']));
 		$keywords=mysql_real_escape_string(html_entity_decode($tags['keywords']));

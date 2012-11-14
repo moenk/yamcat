@@ -17,12 +17,11 @@ $row = mysql_fetch_assoc($result);
 $owner = stripslashes($row["username"]);
 $subtitle = stripslashes($row["uuid"]);
 
-
 if (($username==$owner) or ($username=="admin")) {
 	$id = intval($_REQUEST['id']);
-	$c_Z = mysql_query("SELECT * FROM metadata WHERE id = '$id' ");
-	$r_Z = mysql_fetch_array($c_Z);
-	extract($r_Z);
+	$result = mysql_query("SELECT * FROM metadata WHERE id = '$id' ");
+	$row = mysql_fetch_array($result);
+	extract($row,EXTR_OVERWRITE);
 	?>
 	<form class="ym-form" action="update.php" method="post" class="ym-form linearize-form" role="application" >
 	<input type="hidden" name="id" value="<?php print $id; ?>">

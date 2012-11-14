@@ -35,6 +35,3 @@ function phpmail($email,$subject,$body) {
   }
 }
 ?>
-
-</body>
-</html>

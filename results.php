@@ -64,7 +64,7 @@ if (mysql_num_rows($result) == 0) {
 $z=0;
 print "<table><thead><tr><th>Title</th>";
 if (($categoryterm!="") or ($keywordterm!="")) print "<th>Originator</th>"; else print "<th>Category</th>"; 
-print "<th>Publication</th></tr></thead><tbody>\n";
+print "<th></th><th>Publication</th></tr></thead><tbody>\n";
 while ($row = mysql_fetch_assoc($result)) {
   print "<tr>";
   $id = stripslashes($row["id"]);
@@ -83,8 +83,13 @@ while ($row = mysql_fetch_assoc($result)) {
     $category = stripslashes($row["category"]);
     print "<td><a href=\"results.php?category=".$category."\">".$category."</a></td>";
   }
-  //$organisation = stripslashes($row["organisation"]);
-  $city = stripslashes($row["city"]);
+  $format = "...".strtolower($row["format"]);
+  $linkage = "...".strtolower($row["linkage"]);
+  print "<td>"; 
+  if ((strpos($format,'website')) or (strpos($format,'information'))) print "<img src=\"/img/website.png\" alt=\"Website\" title=\"Website\" />";
+  if (strpos($linkage,'getcapab')) print "<img src=\"/img/wms.png\" alt=\"WMS\" title=\"WMS\" />";
+  if (strpos($linkage,'download')) print "<img src=\"/img/download.png\" alt=\"Download\" title=\"Download\" />";
+  print "</td>";
   $pubdate = stripslashes($row["pubdate"]);
   print "<td>".date("Y-m-d",strtotime($pubdate))."</td>";
   $keywords = stripslashes($row["keywords"]);
@@ -96,9 +101,7 @@ while ($row = mysql_fetch_assoc($result)) {
   $southbc = floatval($row["southbc"]);
   $eastbc = floatval($row["eastbc"]);
   $northbc = floatval($row["northbc"]);
-  $linkage = stripslashes($row["linkage"]);
   $grs = stripslashes($row["grs"]);
-  //print "<td><a href=\"delete.php?id=".$id."\"><img src=\"img/delete.png\" alt=\"delete\" border=\"0\"</a></td>";
   print "</tr>";
   $z++;
 }

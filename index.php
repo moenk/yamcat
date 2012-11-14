@@ -20,10 +20,12 @@ include("main1.php");
 		<div class="ym-gbox-left">
 
 <h3>
-Quick start
+Information
 </h3>
-
-...
+<?php
+$information = file_get_contents("./conf/info.txt");
+echo $information;
+?>
 
 		</div>
 	</article>
@@ -31,10 +33,8 @@ Quick start
 		<div class="ym-gbox">
 
 <h3>
-Information
+Quick guide
 </h3>
-
-
 <?php
 $information = file_get_contents("./conf/start.txt");
 echo $information;

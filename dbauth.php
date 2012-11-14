@@ -15,7 +15,7 @@
 include "conf/config.php";
 include "phpmailer.php";
 
-$redirect = $_SERVER['HTTP_REFERER'];
+$redirect = $domainroot;
 
 function navi() {
 include "navigation.php";
@@ -315,7 +315,7 @@ if ($registration == 1 || isset($_SESSION['install'])) {
 			mysql_query("DELETE FROM register WHERE regtime < $time") or die(mysql_error());
 			mysql_query("INSERT INTO register(username, email, password, regtime, register) VALUES('$insert_username', '$insert_email', '$insert_pass', '$regtime',  '$reg_string' )") or die(mysql_error());
 			$msg = 'Your confirmation url is: ';
-			$msg = $msg . strip_ext($redirect) . '?reg=' . $reg_string;
+			$msg = $msg . $domainroot. 'dbauth.php?reg=' . $reg_string;
 			phpmail($_REQUEST['email'], 'User Registration - Confirmation', $msg);
 /*
 			echo '<meta http-equiv="refresh" content="2;url=';

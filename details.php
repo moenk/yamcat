@@ -18,15 +18,15 @@ $uuid=trim(mysql_real_escape_string($_REQUEST['uuid']));	// part of the insert, 
 $sql="SELECT *, m.id as meta_id FROM metadata as m left join peers as p on (m.peer_id=p.id) where m.uuid='".$uuid."';";
 $result = mysql_query($sql);
 $row = mysql_fetch_assoc($result);
-$title=$row["title"];
+$title=trim(stripslashes($row["title"]));
 // owner is used here for display, used for compare user/owner (buttons), also needed later as "foreign key" for user contacts
 $owner=mysql_real_escape_string($row['username']); 	
 // needed to check if format is a website
-$format = trim(stripslashes($row["format"]));
+$format=strtolower(trim(stripslashes($row["format"])));
 $linkage=trim($row["linkage"]);
 
 if (strlen($title)>40) $title=substr($title,0,40)."...";
-$title = htmlspecialchars(stripslashes($title));
+$title = htmlspecialchars($title);
 $subtitle=htmlspecialchars(stripslashes($row["name"]));
 if ($subtitle=="") $subtitle=$row["category"];
 
@@ -70,7 +70,8 @@ print "<tr>";
   if ($thumbnail!="") {
 	print "<a href=\"".$thumbnail."\" rel=\"lightbox\" title=\"".htmlspecialchars($title)."\"><img src=\"".$thumbnail."\" border=\"0\" width=\"150\"></a>\n";
   }
-  if (($websnaprkey!="") && ($format=='website') && ($thumbnail=="")) {
+  // show thumbnail of website? (iso19139 names it information, website is if metadata form website)
+  if (($websnaprkey!="") && ($thumbnail=="") && (($format=='website') or ($format=='information'))) {
     print "<script type=\"text/javascript\">wsr_snapshot('".$linkage."', '".$websnaprkey."', 's');</script>\n";
   }
   print "</td></tr>\n";
@@ -78,12 +79,12 @@ print "<tr>";
   print "</tr>\n";
 print "</table>\n";
 
-print "<h3>Originator</h3>";
+print "<h3>Source</h3>";
 print "<table>\n";
 $organisation = stripslashes($row["organisation"]);
 print "<tr><td width=\"38%\">Organisation</td><td><b>".htmlspecialchars($organisation)."</b></td></tr>";
 $individual = stripslashes($row["individual"]);
-print "<tr><td>Individual</td><td>".htmlspecialchars($individual)."</td></tr>";
+print "<tr><td>Individual</td><td>".make_clickable($individual)."</td></tr>";
 $city = stripslashes($row["city"]);
 print "<tr><td>City</td><td>".htmlspecialchars($city)."</td></tr>";
 $uselimitation = stripslashes($row["uselimitation"]);
@@ -96,10 +97,8 @@ print "</table>\n";
 
 <article class="ym-g50 ym-gr">
 <div class="ym-gbox">
-<h3>
-Action
-</h3>
 <?php
+// we will need thid later...
 $id=intval($row["meta_id"]);
 $westbc = floatval($row["westbc"]);
 $southbc = floatval($row["southbc"]);
@@ -107,15 +106,23 @@ $eastbc = floatval($row["eastbc"]);
 $northbc = floatval($row["northbc"]);
 $bbox="[".$westbc.",".$southbc.",".$eastbc.",".$northbc."]";
 $wms=trim($row["wms"]);
-if ($wms!="") {
-  print "<a rel=\"nofollow\" class=\"ym-button ym-play\" href=\"wms.php?url=".urlencode($wms)."&bbox=".$bbox."\">Web Map</a>\n";
-}
-if ($format=="website") {
-  print "<a rel=\"nofollow\" target=\"_blank\" class=\"ym-button ym-play\" href=\"".$linkage."\">Web Site</a>\n";
-}
-if ((($username!="") && ($username==$owner)) or $username=="admin") {
-	print "<a rel=\"nofollow\" href=\"edit.php?id=".$id."\" class=\"ym-button ym-edit\">Edit</a>";
-	print "<a rel=\"nofollow\" href=\"delete.php?id=".$id."\" class=\"ym-button ym-delete\">Delete</a>";
+$grs=trim($row["grs"]);
+	 
+// actionblock only if user is logged in
+if ($username!="") {
+	print "<h3>Action</h3>";
+	if ($wms!="") {
+		print "<a rel=\"nofollow\" class=\"ym-button ym-play\" href=\"wms.php?url=".urlencode($wms)."&bbox=".$bbox."&grs=".$grs."\">Preview</a>\n";
+	}
+	// show link to website? (iso19139 names it information, website is if metadata form website)
+	if (($format=="website") or ($format=="information")) {
+		print "<a rel=\"nofollow\" target=\"_blank\" class=\"ym-button ym-play\" href=\"".$linkage."\">Website</a>\n";
+	}
+	if (($username==$owner) or ($username=="admin")) {
+		print "<a rel=\"nofollow\" href=\"edit.php?id=".$id."\" class=\"ym-button ym-edit\">Edit</a>";
+		print "<a rel=\"nofollow\" href=\"delete.php?id=".$id."\" class=\"ym-button ym-delete\">Delete</a>";
+		if ($format=="service") print "<a rel=\"nofollow\" href=\"add_service.php?url=".rawurlencode($wms)."\" class=\"ym-button ym-star\">Refresh</a>";
+	}
 }
 ?>
 <h3>
@@ -173,9 +180,8 @@ print "<h3>Distribution</h3>";
 print "<table>\n";
 
 print "<tr><td>UUID</td><td>".$uuid."</td></tr>\n";
-print "<tr><td>Format</td><td>".$format."</td></tr>\n";
+print "<tr><td>Format</td><td>".ucwords($format)."</td></tr>\n";
 
-$grs = trim(stripslashes($row["grs"]));
 if (substr($grs,0,5)=="EPSG:") {
   $grs="<a rel=\"nofollow\" target=\"epsg\" href=\"http://spatialreference.org/ref/epsg/".substr($grs,5)."/\">".$grs."</a>\n";
 }
@@ -189,7 +195,7 @@ foreach ($linkages as $linkage) {
 print "</td></tr>\n";
 
 $source = trim(stripslashes($row["source"]));
-print "<tr><td>Source</td><td><a href=\"".$domainroot.$source."\">".basename($source)."</a></td></tr>\n";
+print "<tr><td>Metadata</td><td><a href=\"".$domainroot.$source."\">".basename($source)."</a></td></tr>\n";
 mysql_free_result($result);
 
 if (($showcontact==1) or ($username=="admin")) {
@@ -206,7 +212,8 @@ if (($showcontact==1) or ($username=="admin")) {
   print "<tr><td>Adresss</td><td>".$cntaddress."</td></tr>";
   $cntcity = stripslashes($row["zip"]." ".$row["city"]);
   print "<tr><td>Phone</td><td>".$cntcity."</td></tr>";
-  $cntemail = make_clickable(stripslashes($row["email"]));
+  $cntemail = stripslashes($row["email"]);
+  $cntemail = "<a href=\"mailto:".$cntemail."?subject=".rawurlencode($title)."\">".$cntemail."</a>";
   print "<tr><td>E-Mail</td><td>".$cntemail."</td></tr>";
   print "</tr>";
   mysql_free_result($result);
