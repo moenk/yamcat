@@ -1,0 +1,6 @@
+
+Upload the yamcat.sql to your mySQL-server using phpMyAdmin or command line.
+
+Please note: Database structure may change for first release, there is none yet.
+
+The account admin will have the password admin for first logon, please change!
