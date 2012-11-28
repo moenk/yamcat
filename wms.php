@@ -11,6 +11,7 @@ $xml=str_replace('xlink:','xlink_',$xml);
 $xml = simplexml_load_string($xml);
 // print "<pre>"; print_r($xml); die();
 include "conf/config.php";
+include "dbauth.php";
 $title=(string)$xml->ServiceException;
 if ($title=="") $title=(string)$xml->Service->Title;
 $subtitle="";

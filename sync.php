@@ -24,30 +24,32 @@ if ($username=="admin") {
 */
 
 $id = intval($_GET['id']);
-$title="Sync metadata records";
+$title="Sync metadata from geodata";
 include "header.php";
 include "navigation.php";
 include "main1.php";
-print "<h3>Syncing metadata from geodata in ".$dirname."</h3>";
+print "<h3>Metadata parsing results from geodata in ".$dirname."</h3>";
+print "<p>These metadata files form your repository were parsed. Only files with UUID and a geographic extent were added to the database. Missing values are highlighted in this table.</p>";
 
 $peer=-1; // hardcoded value for local data
+print "<table><thead><tr><th>File</th><th>UUID</th><th>Extent</th></tr></thead><tbody>\n";
 $it = new RecursiveDirectoryIterator($dirname);
 global $dateiname;
 foreach(new RecursiveIteratorIterator($it) as $dateiname) {
   if (strtolower(substr($dateiname,-4))==".xml") {
-    print "<p>File: ".$dateiname.": ";
     $md5file=md5($dateiname);
     $xml_string=file_get_contents($dateiname);
     $xml_string = str_replace('gmd:','gmd_',$xml_string);
     $xml_string = str_replace('gco:','gco_',$xml_string);
     $xml=simplexml_load_string($xml_string);
 	global $grs;
-	global $title;	// now the title of the layer
 	global $metaid;
+	global $title;
 	global $format;
+	// now call the parser, result are shown there also as table!
     include "parser.php";
 
-// create a mapfile if this is a shapefile an we have a umn-mapserver installed
+	// create a mapfile if this is a shapefile an we have a umn-mapserver installed
 	if (($mapserverurl!="") && ($grs!="") && (($format=="Shapefile") or ($format=="Raster-Dataset"))) {
 		$path_parts = pathinfo($dateiname);
 		// this is a local file, we need a link to its directory for download, ignoring meta from xml
@@ -151,7 +153,6 @@ END
 
 	  fwrite($handle,$map);
 	  fclose($handle);
-	  print "<p>Mapfile created: ".$mapfile;
 	  // update record with the new WMS/WFS getcapa url
 	  $wms=$mapserverurl."?map=".$mapfile."&service=wms&version=1.1.1&request=GetCapabilities";
 	  $wfs=$mapserverurl."?map=".$mapfile."&service=wfs&version=1.1.0&request=GetCapabilities";
@@ -161,15 +162,11 @@ END
       $linkage.=" OGC:WMS-1.1.1-http-get-capabilities ".$wms." OGC:WFS-1.1.0-http-get-capabilities ".$wfs;
 	  $sql="update metadata set wms='".$wms."', linkage='".$linkage."' where uuid='".$metaid."';";
 	  $results = mysql_query($sql);  
-	  if($results) { 
-		print ", updated GetCapabilties for WMS and WFS.</p>"; 
-	  } else { 
-		die('Invalid query: '.mysql_error()); 
-	  }
 	}  
+  print "</tr>\n"; // next file please
   }
-  print "<p>\n"; // next file please
 }
+print "</tbody></table>";
 include "main2.php";
 include "footer.php";
 ?>

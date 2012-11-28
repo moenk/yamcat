@@ -1,0 +1,24 @@
+<p>
+<b>Search</b>
+<br>
+The search enables you to find metadata records. You can find them by keyword, category or position with a marker on a map.
+<br>
+<a rel="nofollow" class="ym-button ym-next" href="search.php">Search for entries</a>
+</p>
+
+<p>
+<b>Register</b>
+<br>
+You only need to register to add and edit entries. Yes, this is boring, nearly any site wants you to do this. But it's the only way to prevent anonymous bots submitting records here. So please register, you just need a username, the desired password and your e-mail for confirmation.
+<br>
+<a rel="nofollow" class="ym-button ym-next" href="dbauth.php?create">Create a new account</a>
+</p>
+
+<p>
+<b>Add a website</b>
+<br>
+If you want to submit a website with interesting information for reading or downloading, you just need to submit the URL and the metadata is extracted from the website. You need to be logged in for this feature and you can edit the metadata immediately afterwards.
+<br>
+<a rel="nofollow" class="ym-button ym-next" href="add_link.php">Add the URL of a website</a>
+</p>
+

@@ -24,20 +24,20 @@ if ($pubdate=="") $pubdate=(string)$xml->dc_date; // DC
 
 $pubdate=date("Y-m-d",strtotime($pubdate));
 
+// get the metadata id
 $metaid="";
 $metaid=(string)$xml->gmd_fileIdentifier->gco_CharacterString; // ISO 19139 !!
 if ($metaid=="") $metaid=(string)$xml->dc_identifier; // DC
 if ($metaid=="") $metaid=(string)$xml->Esri->MetaID; // altes ArcGIS
 if ($metaid=="") $metaid=(string)$xml->mdFileID; // neues ArcGIS
 if ($metaid=="") $metaid = $creadate."-".$creatime; // fake uuid if missing metadata
-$metaid=str_replace('{',"",$metaid);
+$metaid=str_replace('{',"",$metaid);	// remove windows style brackets
 $metaid=str_replace('}',"",$metaid);
-print "Metdata-ID: ".$metaid;
 
 // title suchen und merken
 $title=(string)$xml->gmd_identificationInfo->gmd_MD_DataIdentification->gmd_citation->gmd_CI_Citation->gmd_title->gco_CharacterString;
-if ($title=="") $title=(string)$xml->idinfo->citation->citeinfo->title; // ganz altes arcgis
-if ($title=="") $title=(string)$xml->dataIdInfo->idCitation->resTitle; // neues arcgis
+if ($title=="") $title=(string)$xml->dataIdInfo->idCitation->resTitle; 	// neues arcgis
+if ($title=="") $title=(string)$xml->idinfo->citation->citeinfo->title; // altes arcgis
 if ($title=="") $title=(string)$xml->Esri->DataProperties->itemProps->itemName;
 if ($title=="") $title=(string)$xml->dc_title; // DC
 if ($title=="") { // erst suchen wenn nicht da wo er hin gehört.
@@ -51,10 +51,10 @@ if ($title=="") $title=basename($dateiname);	// this is worst option but better 
 $title=mysql_escape_string($title);
 
 $abstract=(string)$xml->gmd_identificationInfo->gmd_MD_DataIdentification->gmd_abstract->gco_CharacterString;
+if ($abstract=="") $abstract=(string)$xml->dataIdInfo->idAbs; // ArcGIS ISO
 if ($abstract=="") $abstract=(string)$xml->dct_abstract; // DCT
 if ($abstract=="") $abstract=(string)$xml->dc_description; // DC
 if ($abstract=="") $abstract=(string)$xml->idinfo->descript->abstract;
-if ($abstract=="") $abstract=(string)$xml->dataIdInfo->idAbs; // ArcGIS ISO
 if ($abstract=="") {
   $xpath_search="gmd_abstract";
   $xpath_found="";
@@ -72,8 +72,8 @@ if ($purpose=="") {
   $result = $xml->xpath($xpath_found.'/gco_CharacterString');
   $purpose=(string)$result[0];
 }
-if ($purpose=="") $purpose=(string)$xml->idinfo->descript->purpose;
 if ($purpose=="") $purpose=(string)$xml->dataIdInfo->idPurp; // ArcGIS ISO
+if ($purpose=="") $purpose=(string)$xml->idinfo->descript->purpose;
 if ($purpose=="") $purpose=(string)$xml->gmd_dataQualityInfo->gmd_DQ_DataQuality->gmd_lineage->gmd_LI_Lineage->gmd_statement->gco_CharacterString;
 if ($purpose=="") $purpose=(string)$xml->gmd_identificationInfo->gmd_MD_DataIdentification->gmd_supplementalInformation->gco_CharacterString;
 $purpose=mysql_escape_string(strip_tags($purpose));
@@ -113,8 +113,8 @@ $xpath_found="";
 xmlRecurse($xml,$xpath=null);  // rekursive suche
 $result = $xml->xpath($xpath_found.'/gco_CharacterString');
 $useconst=(string)$result[0];
-if ($useconst=="") $useconst=(string)$xml->idinfo->useconst;
 if ($useconst=="") $useconst=(string)$xml->dataIdInfo->resConst->Consts->useLimit;
+if ($useconst=="") $useconst=(string)$xml->idinfo->useconst;
 if ($useconst=="") $useconst=(string)$xml->dc_rights; // DC
 $useconst=mysql_escape_string($useconst);
 
@@ -169,6 +169,9 @@ if ($category=="") {
 
 // jetzt haben wir die categorien zum vergleich im array md_categories
 $keywords="";
+foreach ($xml->dataIdInfo->searchKeys->keyword as $tag) {
+  $keywords.=$tag.", ";
+}
 foreach ($xml->idinfo->keywords->theme->themekey as $tag) {
   if (in_array($tag, $md_categories)) $category=$tag; // automatische Theme-Key Zuordnung
   $keywords.=$tag.", ";
@@ -177,9 +180,6 @@ foreach ($xml->idinfo->keywords->place->placekey as $tag) {
   $keywords.=$tag.", ";
 }
 foreach ($xml->idinfo->keywords->temporal->tempkey as $tag) {
-  $keywords.=$tag.", ";
-}
-foreach ($xml->dataIdInfo->searchKeys->keyword as $tag) {
   $keywords.=$tag.", ";
 }
 foreach ($xml->gmd_identificationInfo->gmd_MD_DataIdentification->gmd_descriptiveKeywords as $keyclass) {
@@ -324,23 +324,17 @@ if ($thumbnail!="") {
 }
 
 if (($metaid!="") && ($area>0)){ // only insert metadata with co-ordinates and meta-id
-  $sql = "delete FROM `metadata` WHERE `uuid`='".$metaid."'";
-  $results = mysql_query($sql);
-  if($results) { 
-    print ", old record deleted"; 
-  } else { 
-    die('Invalid query: '.mysql_error()); 
-  }
-  $username=mysql_real_escape_string($_SESSION['username']);
-  $sql="INSERT INTO metadata (id, uuid, peer_id, title, pubdate, abstract, purpose, individual, category, format, organisation, city, keywords, denominator, thumbnail, uselimitation, westbc, southbc, eastbc, northbc, area, linkage, source, wms, grs, username) VALUES ('', '".$metaid."',".$peer.", '".$title."', '".$pubdate."', '".$abstract."', '".$purpose."', '".$individual."', '".$category."', '".$format."', '".$origin."', '".$city."', '".$keywords."', '".$denominator."', '".$thumbnail."', '".$useconst."', ".$westbc.", ".$southbc.", ".$eastbc.", ".$northbc.", ".$area.", '".$linkage."', '".$dateiname."', '".$wms."', '".$grs."', '".$username."')";
-  $results = mysql_query($sql);  
-  if($results) { 
-    print ", metadata successfully added, <a href=\"details.php?uuid=$metaid\">please click here</a> to see this record."; 
-  } else { 
-    die('Invalid query: '.mysql_error()); 
-  }
-} else {
-  print ", not added to database.";
-}  
- 
+	$sql = "delete FROM `metadata` WHERE `uuid`='".$metaid."'";
+	$results = mysql_query($sql);
+	$username=mysql_real_escape_string($_SESSION['username']);
+	$sql="INSERT INTO metadata (id, uuid, peer_id, title, pubdate, abstract, purpose, individual, category, format, organisation, city, keywords, denominator, thumbnail, uselimitation, westbc, southbc, eastbc, northbc, area, linkage, source, wms, grs, username) VALUES ('', '".$metaid."',".$peer.", '".$title."', '".$pubdate."', '".$abstract."', '".$purpose."', '".$individual."', '".$category."', '".$format."', '".$origin."', '".$city."', '".$keywords."', '".$denominator."', '".$thumbnail."', '".$useconst."', ".$westbc.", ".$southbc.", ".$eastbc.", ".$northbc.", ".$area.", '".$linkage."', '".$dateiname."', '".$wms."', '".$grs."', '".$username."')";
+	$results = mysql_query($sql);  
+	print "<tr>";
+} else print "<tr bgcolor=yellow>"; // if not added.
+
+// give some output in table form
+print "<td><b>".basename($dateiname)."</b></td>";
+print "<td><a target=\"_blank\" href=\"details.php?uuid=".$metaid."\">".$metaid."</a></td>";
+print "<td>".$area."</td></tr>";
+
 ?>

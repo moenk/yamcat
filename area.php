@@ -10,12 +10,13 @@
 
 
 function bbox2area($lat1,$lon1,$lat2,$lon2) {  	// nord-west und süd-ost ecken
-  $dlat=abs($lat1-$lat2);
-  $dlon=abs($lon2-$lon1);
-  $mlat=($lat1+$lat2)/2;  						// mittelwert der lat
-  $mlon=cos(deg2rad($mlat))*$dlon;				// im cosinus als verkürzung der londiff
-  $area=$mlon*$dlat;  							// londiff verkürzt mal latdiff
-  return $area;
+	$dlat=abs($lat1-$lat2);
+	$dlon=abs($lon2-$lon1);
+	$mlat=($lat1+$lat2)/2;  						// mittelwert der lat
+	$mlon=cos(deg2rad($mlat))*$dlon;				// im cosinus als verkürzung der londiff
+	$area=$mlon*$dlat;  							// londiff verkürzt mal latdiff
+	if ($area<0) $area=0;
+	return $area;
 }
 
 ?>

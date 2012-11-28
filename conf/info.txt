@@ -1,0 +1,33 @@
+<p>
+<b>Die Geodateninfrastruktur des Geographischen Institutes der Humboldt-Universität zu Berlin</b>
+<i>– was ist das, wieso gibt es das und wie geht das?</i>
+</p>
+<p>
+<b>Was ist eine GDI?</b><br>
+Die Geodateninfrastruktur (GDI) strukturiert und organisiert die Grundlagen der Nutzung von Geodaten.
+</p>
+<p>
+<b>Wieso gibt es die GDI?</b>
+<br>
+Ziel der Geodateninfrastruktur ist es die im Institut vorliegenden Daten besser nutzen zu können. Auf jedem Rechner liegen diverse Daten und diese lassen sich auch von anderen sicherlich sinnvoll nutzen. Darüber hinaus gibt es eine ganze Menge Daten, auf die wir alle immer mal wieder zugreifen, z. B. ATKIS, CORINE oder Berliner Umweltatlas-Daten. Auch diese werden schon bzw. sollen zentral bereitgestellt werden.
+</p>
+<p>
+<b>Wie geht das?</b>
+<br>
+Zunächst einmal gibt es ein Metainformationssystem, in dem Informationen über die verfügbaren Daten bereitgestellt werden: Zugangsrechte, Ansprechpartner, Aktualität, Abdeckung des Gebietes… (HIER MANUAL ZUM METAIS VERLINKEN)
+<br>
+Dann gibt es den Zugriff auf einzelne Dateien oder Datensätzen aus einer Geodatenbank.
+<br>
+Die gewünschten und ausgewählten Daten lassen sich über einen Link direkt downloaden. Für den Download und die Nutzung der Daten ist keine neue Installation auf dem PC erforderlich, wenn eine GIS-Software (ArcGIS, PostGIS…) bereits installiert ist.
+<br>
+Zurzeit sind > 1.000 Metadatensätze (mit Schwerpunkt Berlin) im System enthalten. Und es könnten noch viel, viel mehr werden… 
+</p>
+<p>
+<b>Fragen und Anmerkungen</b>
+<br>
+<a href="http://www.geographie.hu-berlin.de/Members/moenkemeier_thomas">B. Eng. Thomas Mönkemeier</a>
+<br>
+<a href="http://www.geographie.hu-berlin.de/Members/lakes_tobia">Prof. Dr. Tobia Lakes</a>
+<br>
+</p>
+
