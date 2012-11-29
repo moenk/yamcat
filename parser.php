@@ -334,6 +334,7 @@ if (($metaid!="") && ($area>0)){ // only insert metadata with co-ordinates and m
 
 // give some output in table form
 print "<td><b>".basename($dateiname)."</b></td>";
+print "<td><a href=\"files.php?dataset=".$dataset."\">".$dataset."</a></td>";
 print "<td><a target=\"_blank\" href=\"details.php?uuid=".$metaid."\">".$metaid."</a></td>";
 print "<td>".$area."</td></tr>";
 

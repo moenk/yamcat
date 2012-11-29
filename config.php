@@ -1,4 +1,3 @@
 ﻿<?php
-// moved to "./conf/config.php"
-
+include "conf/config.php";
 ?>

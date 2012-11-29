@@ -211,7 +211,7 @@ if (($showcontact==1) or ($username=="admin")) {
   $cntaddress = stripslashes($row["address"]);
   print "<tr><td>Adresss</td><td>".$cntaddress."</td></tr>";
   $cntcity = stripslashes($row["zip"]." ".$row["city"]);
-  print "<tr><td>Phone</td><td>".$cntcity."</td></tr>";
+  print "<tr><td>City</td><td>".$cntcity."</td></tr>";
   $cntemail = stripslashes($row["email"]);
   $cntemail = "<a href=\"mailto:".$cntemail."?subject=".rawurlencode($title)."\">".$cntemail."</a>";
   print "<tr><td>E-Mail</td><td>".$cntemail."</td></tr>";

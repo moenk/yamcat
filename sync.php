@@ -32,10 +32,14 @@ print "<h3>Metadata parsing results from geodata in ".$dirname."</h3>";
 print "<p>These metadata files form your repository were parsed. Only files with UUID and a geographic extent were added to the database. Missing values are highlighted in this table.</p>";
 
 $peer=-1; // hardcoded value for local data
-print "<table><thead><tr><th>File</th><th>UUID</th><th>Extent</th></tr></thead><tbody>\n";
+print "<table><thead><tr><th>File</th><th>Dataset</th><th>UUID</th><th>Extent</th></tr></thead><tbody>\n";
 $it = new RecursiveDirectoryIterator($dirname);
 global $dateiname;
 foreach(new RecursiveIteratorIterator($it) as $dateiname) {
+	// if new directory entered takes its name as dataset for storage
+	if (substr($dateiname,-2,2)=="/.") {
+		$dataset=basename(substr($dateiname,0,-2));
+	}
   if (strtolower(substr($dateiname,-4))==".xml") {
     $md5file=md5($dateiname);
     $xml_string=file_get_contents($dateiname);
@@ -160,7 +164,7 @@ END
 	  $sql="update metadata set wms='".$wms."', linkage=concat(linkage,' OGC:WMS-1.1.1-http-get-capabilities ".$wms."',' OGC:WFS-1.1.0-http-get-capabilities ".$wfs."'), keywords=concat(keywords,', WMS, WFS') where uuid='".$metaid."';";
 */
       $linkage.=" OGC:WMS-1.1.1-http-get-capabilities ".$wms." OGC:WFS-1.1.0-http-get-capabilities ".$wfs;
-	  $sql="update metadata set wms='".$wms."', linkage='".$linkage."' where uuid='".$metaid."';";
+	  $sql="update metadata set wms='".$wms."', dataset='".$dataset."', linkage='".$linkage."' where uuid='".$metaid."';";
 	  $results = mysql_query($sql);  
 	}  
   print "</tr>\n"; // next file please
