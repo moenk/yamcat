@@ -72,7 +72,8 @@ if ($purpose=="") {
   $result = $xml->xpath($xpath_found.'/gco_CharacterString');
   $purpose=(string)$result[0];
 }
-if ($purpose=="") $purpose=(string)$xml->dataIdInfo->idPurp; // ArcGIS ISO
+if ($purpose=="") $purpose=(string)$xml->dataIdInfo->idPurp;	// ArcGIS ISO
+if (substr($purpose."REQUIRED:")!=false) $purpose="";			// Zap default value by ArcCatalog
 if ($purpose=="") $purpose=(string)$xml->idinfo->descript->purpose;
 if ($purpose=="") $purpose=(string)$xml->gmd_dataQualityInfo->gmd_DQ_DataQuality->gmd_lineage->gmd_LI_Lineage->gmd_statement->gco_CharacterString;
 if ($purpose=="") $purpose=(string)$xml->gmd_identificationInfo->gmd_MD_DataIdentification->gmd_supplementalInformation->gco_CharacterString;

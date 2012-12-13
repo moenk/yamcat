@@ -100,6 +100,7 @@ print "</table>\n";
 <?php
 // we will need thid later...
 $id=intval($row["meta_id"]);
+$dataset=intval($row["dataset"]);
 $westbc = floatval($row["westbc"]);
 $southbc = floatval($row["southbc"]);
 $eastbc = floatval($row["eastbc"]);
@@ -111,8 +112,13 @@ $grs=trim($row["grs"]);
 // actionblock only if user is logged in
 if ($username!="") {
 	print "<h3>Action</h3>";
+	// WMS available? Then you can see a "preview" what is a really good wms client indeed
 	if ($wms!="") {
 		print "<a rel=\"nofollow\" class=\"ym-button ym-play\" href=\"wms.php?url=".urlencode($wms)."&bbox=".$bbox."&grs=".$grs."\">Preview</a>\n";
+	}
+	// A dataset to download?
+	if ($dataset!="") {
+		print "<a rel=\"nofollow\" class=\"ym-button ym-play\" href=\"download.php?repository=".$username."&dataset=".$dataset."\">Download</a>\n";
 	}
 	// show link to website? (iso19139 names it information, website is if metadata form website)
 	if (($format=="website") or ($format=="information")) {

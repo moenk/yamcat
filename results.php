@@ -64,7 +64,7 @@ if (mysql_num_rows($result) == 0) {
 $z=0;
 print "<table><thead><tr><th>Title</th>";
 if (($categoryterm!="") or ($keywordterm!="")) print "<th>Originator</th>"; else print "<th>Category</th>"; 
-print "<th></th><th>Publication</th></tr></thead><tbody>\n";
+print "<th></th><th>Owner</th><th>Publication</th></tr></thead><tbody>\n";
 while ($row = mysql_fetch_assoc($result)) {
   print "<tr>";
   $id = stripslashes($row["id"]);
@@ -90,6 +90,8 @@ while ($row = mysql_fetch_assoc($result)) {
   if (strpos($linkage,'getcapab')) print "<img src=\"/img/wms.png\" alt=\"WMS\" title=\"WMS\" />";
   if (strpos($linkage,'download')) print "<img src=\"/img/download.png\" alt=\"Download\" title=\"Download\" />";
   print "</td>";
+  $owner = stripslashes($row["username"]);
+  print "<td><a href=\"results.php?username=".$owner."\">".$owner."</a></td>";
   $pubdate = stripslashes($row["pubdate"]);
   print "<td>".date("Y-m-d",strtotime($pubdate))."</td>";
   $keywords = stripslashes($row["keywords"]);
