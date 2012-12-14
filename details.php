@@ -100,12 +100,12 @@ print "</table>\n";
 <?php
 // we will need thid later...
 $id=intval($row["meta_id"]);
-$dataset=intval($row["dataset"]);
 $westbc = floatval($row["westbc"]);
 $southbc = floatval($row["southbc"]);
 $eastbc = floatval($row["eastbc"]);
 $northbc = floatval($row["northbc"]);
 $bbox="[".$westbc.",".$southbc.",".$eastbc.",".$northbc."]";
+$dataset=trim($row["dataset"]);
 $wms=trim($row["wms"]);
 $grs=trim($row["grs"]);
 	 
@@ -118,7 +118,7 @@ if ($username!="") {
 	}
 	// A dataset to download?
 	if ($dataset!="") {
-		print "<a rel=\"nofollow\" class=\"ym-button ym-play\" href=\"download.php?repository=".$username."&dataset=".$dataset."\">Download</a>\n";
+		print "<a rel=\"nofollow\" class=\"ym-button ym-play\" href=\"download.php?repository=".$owner."&dataset=".$dataset."\">Download</a>\n";
 	}
 	// show link to website? (iso19139 names it information, website is if metadata form website)
 	if (($format=="website") or ($format=="information")) {
