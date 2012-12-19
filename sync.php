@@ -93,7 +93,7 @@ if ($format=="Shapefile") $map='MAP
   END
 
   LAYER
-    NAME "'.$title.'"
+    NAME "'.basename($shapefile).'"
     TYPE POLYGON 
     STATUS ON 
 	DUMP ON
