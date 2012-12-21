@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Erstellungszeit: 28. November 2012 um 17:10
+-- Erstellungszeit: 29. November 2012 um 15:12
 -- Server Version: 5.1.63
 -- PHP-Version: 5.3.3-7+squeeze14
 
@@ -90,6 +90,8 @@ CREATE TABLE IF NOT EXISTS `metadata` (
   `wms` varchar(255) NOT NULL,
   `grs` varchar(50) NOT NULL,
   `username` varchar(32) NOT NULL,
+  `dataset` varchar(255) NOT NULL,
+  `status` int(11) NOT NULL,
   UNIQUE KEY `id` (`id`),
   FULLTEXT KEY `fulltextindex` (`title`,`abstract`,`purpose`,`keywords`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;

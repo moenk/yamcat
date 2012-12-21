@@ -72,7 +72,8 @@ if ($purpose=="") {
   $result = $xml->xpath($xpath_found.'/gco_CharacterString');
   $purpose=(string)$result[0];
 }
-if ($purpose=="") $purpose=(string)$xml->dataIdInfo->idPurp; // ArcGIS ISO
+if ($purpose=="") $purpose=(string)$xml->dataIdInfo->idPurp;	// ArcGIS ISO
+if (substr($purpose."REQUIRED:")!=false) $purpose="";			// Zap default value by ArcCatalog
 if ($purpose=="") $purpose=(string)$xml->idinfo->descript->purpose;
 if ($purpose=="") $purpose=(string)$xml->gmd_dataQualityInfo->gmd_DQ_DataQuality->gmd_lineage->gmd_LI_Lineage->gmd_statement->gco_CharacterString;
 if ($purpose=="") $purpose=(string)$xml->gmd_identificationInfo->gmd_MD_DataIdentification->gmd_supplementalInformation->gco_CharacterString;
@@ -334,6 +335,7 @@ if (($metaid!="") && ($area>0)){ // only insert metadata with co-ordinates and m
 
 // give some output in table form
 print "<td><b>".basename($dateiname)."</b></td>";
+print "<td><a href=\"files.php?dataset=".$dataset."\">".$dataset."</a></td>";
 print "<td><a target=\"_blank\" href=\"details.php?uuid=".$metaid."\">".$metaid."</a></td>";
 print "<td>".$area."</td></tr>";
 

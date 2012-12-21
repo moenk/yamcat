@@ -105,14 +105,20 @@ $southbc = floatval($row["southbc"]);
 $eastbc = floatval($row["eastbc"]);
 $northbc = floatval($row["northbc"]);
 $bbox="[".$westbc.",".$southbc.",".$eastbc.",".$northbc."]";
+$dataset=trim($row["dataset"]);
 $wms=trim($row["wms"]);
 $grs=trim($row["grs"]);
 	 
 // actionblock only if user is logged in
 if ($username!="") {
 	print "<h3>Action</h3>";
+	// WMS available? Then you can see a "preview" what is a really good wms client indeed
 	if ($wms!="") {
 		print "<a rel=\"nofollow\" class=\"ym-button ym-play\" href=\"wms.php?url=".urlencode($wms)."&bbox=".$bbox."&grs=".$grs."\">Preview</a>\n";
+	}
+	// A dataset to download?
+	if ($dataset!="") {
+		print "<a rel=\"nofollow\" class=\"ym-button ym-play\" href=\"download.php?repository=".$owner."&dataset=".$dataset."\">Download</a>\n";
 	}
 	// show link to website? (iso19139 names it information, website is if metadata form website)
 	if (($format=="website") or ($format=="information")) {
@@ -211,7 +217,7 @@ if (($showcontact==1) or ($username=="admin")) {
   $cntaddress = stripslashes($row["address"]);
   print "<tr><td>Adresss</td><td>".$cntaddress."</td></tr>";
   $cntcity = stripslashes($row["zip"]." ".$row["city"]);
-  print "<tr><td>Phone</td><td>".$cntcity."</td></tr>";
+  print "<tr><td>City</td><td>".$cntcity."</td></tr>";
   $cntemail = stripslashes($row["email"]);
   $cntemail = "<a href=\"mailto:".$cntemail."?subject=".rawurlencode($title)."\">".$cntemail."</a>";
   print "<tr><td>E-Mail</td><td>".$cntemail."</td></tr>";

@@ -57,7 +57,7 @@ foreach ($layers as $layer) {
 	$isbaselayer="false";
 	print '        var layer'.$layernummer.' = new OpenLayers.Layer.WMS("'.$titel.'",
             "'.$getmapurl.'", 
-            {layers: "'.$layername.'", transparent: "true"';
+            {layers: "'.$layername.'", transparent: "TRUE"';
 	// if running our mapserv, use png with 24 bit, otherwise whatever server likes to give us			
 	if (strpos($url,"mapserv")!=false) print ', format: "image/png; mode=24bit"';
 	// set baselayer according to variable check above

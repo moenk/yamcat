@@ -22,7 +22,7 @@ if (isset($_SESSION['logged_in'])) {
 	print "<li><a href=\"dbauth.php?logout\">Logout</a></li>\n";
 } else {
 	print "<li><a href=\"dbauth.php?login\">Login</a></li>\n";
-	print "<li><a href=\"dbauth.php?create\">Register</a></li>\n";
+	if ($registration==1) print "<li><a href=\"dbauth.php?create\">Register</a></li>\n";
 	print "<li><a href=\"dbauth.php?pass_reset\">Forgot Password</a></li>\n";
 }
 ?>

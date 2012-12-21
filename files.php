@@ -56,7 +56,7 @@ A dataset contains all files with geodata belonging together. It will be created
 </p>
 <form action="files.php" method="GET" class="ym-form linearize-form" role="application" >
 <div class="ym-fbox-text">
-<label for="dataset">New dataset:</label>
+<label for="dataset">Name of new dataset to create:</label>
 <input type="dataset" name="dataset" id="dataset" /> 
 </div>
 <input type="submit" value="Create dataset" />
@@ -93,6 +93,13 @@ if ($_FILES["file"]["tmp_name"]!="") {
 */
 		shell_exec("unzip -jo ".$target." -d ".$dirname."/");
 		unlink($target);
+		// adjust file names for unzipped files
+		$zipfiles = scandir($dirname);
+		foreach ($zipfiles as $key=>$name) {
+			$oldName = $name;
+			$newName = strtolower(ereg_replace("[^A-Za-z0-9\.]","_",$name));
+			rename("$dirname/$oldName","$dirname/$newName");
+		}
 	};
 }
 ?>
