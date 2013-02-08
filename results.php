@@ -87,7 +87,7 @@ while ($row = mysql_fetch_assoc($result)) {
   $linkage = "...".strtolower($row["linkage"]);
   print "<td>"; 
   if ((strpos($format,'website')) or (strpos($format,'information'))) print "<img src=\"/img/website.png\" alt=\"Website\" title=\"Website\" />";
-  if (strpos($linkage,'getcapab')) print "<img src=\"/img/wms.png\" alt=\"WMS\" title=\"WMS\" />";
+  if ((strpos($format,'service')) or (strpos($linkage,'getcapa'))) print "<img src=\"/img/wms.png\" alt=\"WMS\" title=\"WMS\" />";
   if (strpos($linkage,'download')) print "<img src=\"/img/download.png\" alt=\"Download\" title=\"Download\" />";
   print "</td>";
   $owner = stripslashes($row["username"]);
