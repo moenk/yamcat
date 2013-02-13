@@ -30,14 +30,16 @@ include("main1.php");
 <div class="ym-gbox-left">
 <?php
 print "<h3>Recipients</h3>";
-$result = mysql_query("SELECT surname, name, email FROM `users` WHERE email!='';");
+$result = mysql_query("SELECT username, email FROM `users` WHERE email!='';");
+// $result = mysql_query("SELECT username, email FROM `users` WHERE username='admin';");
 print "<table><tbody>\n";
 while ($row = mysql_fetch_assoc($result)) {
-	$name = stripslashes($row["surname"]).", ".stripslashes($row["name"]);
-	if ($name==", ") $name="";
 	$email = stripslashes($row["email"]);
-	print "<tr><td>".$name."</td><td>".$email."</td></tr>\n";
-	if ($message!="") print "<tr><td bgcolor=yellow colspan=\"2\">".phpmail($email,$subject,$message)."</td></tr>\n";
+	$username = stripslashes($row["username"]);
+	print "<tr><td>".$username."</td><td>".$email."</td></tr>\n";
+	if ($message!="") {
+		print "<tr><td bgcolor=yellow colspan=\"2\">".phpmail($email,$username,$subject,$message)."</td></tr>\n";
+	}
 }
 print "</tbody></table>\n";
 ?>

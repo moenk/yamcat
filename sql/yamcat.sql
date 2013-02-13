@@ -3045,3 +3045,5 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 INSERT INTO `users` (`id`, `username`, `password`, `surname`, `name`, `profile`, `address`, `city`, `state`, `zip`, `country`, `email`, `organisation`, `kind`) VALUES
 (1, 'admin', 'd033e22ae348aeb5660fc2140aec35850c4da997', '', '', 'Administrator', '', '', '', '', '', '', '', '');
+
+

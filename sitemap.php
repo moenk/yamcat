@@ -1,6 +1,14 @@
 <?php
-header ("Content-Type:text/xml");
 
+//
+//	file: sitemap.php
+//
+//	coder: moenk
+//
+//	purpose: create sitemap suiteable for search engines
+//
+
+header ("Content-Type:text/xml");
 include "conf/config.php";
 include "connect.php";
 
@@ -11,15 +19,18 @@ if (isset($category)) {
     echo '<?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ';
-      $sql = 'select uuid, pubdate from metadata where category=\''.mysql_escape_string($category).'\' order by pubdate desc;';
-	  $result = mysql_query($sql);
-	  while ($row = mysql_fetch_assoc($result)) {
+    $sql = 'select uuid, pubdate, format from metadata where category=\''.mysql_escape_string($category).'\' order by pubdate desc;';
+	$result = mysql_query($sql);
+	while ($row = mysql_fetch_assoc($result)) {
 		echo '    <url>
       <loc>'.$domainroot.'details.php?uuid='.$row['uuid'].'</loc>
       <lastmod>'.substr($row['pubdate'],0,10),'</lastmod>
     </url>';
-      }
-     echo '  </urlset>
+		if (strtolower($row['format'])=="newsfeed") echo '    <url>
+      <loc>'.$domainroot.'news.php?uuid='.$row['uuid'].'</loc>
+    </url>';
+	}
+    echo '  </urlset>
 	 ';
 } else {
   echo '<?xml version="1.0" encoding="UTF-8"?>

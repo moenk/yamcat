@@ -126,7 +126,16 @@ Availability
 
 <div class="ym-fbox-text">
 <label for="format">Format<?php popuphelp("format"); ?></label>
-<input name="format" maxlength="" type="text" value="<?php echo $format; ?>">
+<?php
+$formats = array('Website','Newsfeed','Service','File Geodatabase Feature Class','Raster Dataset','Shapefile');
+print "<select name=\"format\" size=\"1\">\n";
+foreach ($formats as $formatname) {
+  print "<option value=\"".$formatname."\" ";
+  if (ucwords($format)==$formatname) print "selected";
+  print ">".$formatname."</option>\n";
+}
+print "</select>\n";
+?>
 </div>
 
 <div class="ym-fbox-text">

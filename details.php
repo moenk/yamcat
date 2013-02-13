@@ -124,6 +124,9 @@ if ($username!="") {
 	if (($format=="website") or ($format=="information")) {
 		print "<a rel=\"nofollow\" target=\"_blank\" class=\"ym-button ym-play\" href=\"".$linkage."\">Website</a>\n";
 	}
+	if ($format=="newsfeed") {
+		print "<a class=\"ym-button ym-play\" href=\"news.php?uuid=".$uuid."\">News</a>\n";
+	}
 	if ((($username==$owner) or ($username=="admin")) and ($dataset=="")) {
 		print "<a rel=\"nofollow\" href=\"edit.php?id=".$id."\" class=\"ym-button ym-edit\">Edit</a>";
 		print "<a rel=\"nofollow\" href=\"delete.php?id=".$id."\" class=\"ym-button ym-delete\">Delete</a>";

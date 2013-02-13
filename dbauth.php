@@ -200,7 +200,7 @@ if (isset($_REQUEST['pass_reset'])) {
 		if ($result_email == "1") {
 			mysql_query("UPDATE users SET password = '$new_password' WHERE email = '$email'") or die(mysql_error());
 			$msg = 'Your password has been reset to: ' . $base_password;
-			phpmail($email, 'Password Reset', $msg);
+			phpmail($email, $email, 'Password Reset', $msg);
 			head('warning');
 			echo '<meta http-equiv="refresh" content="2;url=';
 			echo strip_ext($redirect);
@@ -316,7 +316,7 @@ if ($registration == 1 || isset($_SESSION['install'])) {
 			mysql_query("INSERT INTO register(username, email, password, regtime, register) VALUES('$insert_username', '$insert_email', '$insert_pass', '$regtime',  '$reg_string' )") or die(mysql_error());
 			$msg = 'Your confirmation url is: ';
 			$msg = $msg . $domainroot. 'dbauth.php?reg=' . $reg_string;
-			phpmail($_REQUEST['email'], 'User Registration - Confirmation', $msg);
+			phpmail($_REQUEST['email'], $insert_username, 'User Registration - Confirmation', $msg);
 /*
 			echo '<meta http-equiv="refresh" content="2;url=';
 			echo $_SESSION['referrer'];

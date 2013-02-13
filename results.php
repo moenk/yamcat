@@ -86,9 +86,10 @@ while ($row = mysql_fetch_assoc($result)) {
   $format = "...".strtolower($row["format"]);
   $linkage = "...".strtolower($row["linkage"]);
   print "<td>"; 
-  if ((strpos($format,'website')) or (strpos($format,'information'))) print "<img src=\"/img/website.png\" alt=\"Website\" title=\"Website\" />";
-  if ((strpos($format,'service')) or (strpos($linkage,'getcapa'))) print "<img src=\"/img/wms.png\" alt=\"WMS\" title=\"WMS\" />";
-  if (strpos($linkage,'download')) print "<img src=\"/img/download.png\" alt=\"Download\" title=\"Download\" />";
+  if ((strpos($format,'website')) or (strpos($format,'information'))) print "<img src=\"img/website.png\" alt=\"Website\" title=\"Website\" />";
+  if ((strpos($format,'service')) or (strpos($linkage,'getcapa'))) print "<img src=\"img/wms.png\" alt=\"WMS\" title=\"WMS\" />";
+  if (strpos($format,'newsfeed')) print "<a href=\"news.php?uuid=".$uuid."\"><img border=\"0\" src=\"img/newsfeed.png\" alt=\"Newsfeed\" title=\"Newsfeed\" /></a>";
+  if (strpos($linkage,'download')) print "<img src=\"img/download.png\" alt=\"Download\" title=\"Download\" />";
   print "</td>";
   $owner = stripslashes($row["username"]);
   print "<td><a href=\"results.php?username=".$owner."\">".$owner."</a></td>";
