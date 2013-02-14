@@ -1,23 +1,21 @@
--- phpMyAdmin SQL Dump
--- version 3.3.7deb7
--- http://www.phpmyadmin.net
---
--- Host: localhost
--- Erstellungszeit: 29. November 2012 um 15:12
--- Server Version: 5.1.63
--- PHP-Version: 5.3.3-7+squeeze14
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+-- --------------------------------------------------------
 
 --
--- Datenbank: `test`
+-- Tabellenstruktur für Tabelle `news`
 --
+
+CREATE TABLE IF NOT EXISTS `news` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `metadata_id` int(11) NOT NULL,
+  `pubdate` datetime NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `link` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
 
 -- --------------------------------------------------------
 
@@ -94,7 +92,7 @@ CREATE TABLE IF NOT EXISTS `metadata` (
   `status` int(11) NOT NULL,
   UNIQUE KEY `id` (`id`),
   FULLTEXT KEY `fulltextindex` (`title`,`abstract`,`purpose`,`keywords`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ;
 
 --
 -- Daten für Tabelle `metadata`
@@ -112,7 +110,7 @@ CREATE TABLE IF NOT EXISTS `peers` (
   `name` varchar(100) NOT NULL,
   `url` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=44 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
 
 --
 -- Daten für Tabelle `peers`
@@ -131,7 +129,7 @@ CREATE TABLE IF NOT EXISTS `popups` (
   `topic` varchar(20) NOT NULL,
   `popup` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=21 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
 
 --
 -- Daten für Tabelle `popups`
@@ -172,7 +170,7 @@ CREATE TABLE IF NOT EXISTS `register` (
   `regtime` varchar(30) DEFAULT NULL,
   `register` varchar(30) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
 
 --
 -- Daten für Tabelle `register`
@@ -3037,7 +3035,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `organisation` varchar(128) DEFAULT NULL,
   `kind` varchar(16) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=36 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;
 
 --
 -- Daten für Tabelle `users`

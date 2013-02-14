@@ -64,49 +64,54 @@ if (mysql_num_rows($result) == 0) {
 $z=0;
 print "<table><thead><tr><th>Title</th>";
 if (($categoryterm!="") or ($keywordterm!="")) print "<th>Originator</th>"; else print "<th>Category</th>"; 
-print "<th></th><th>Owner</th><th>Publication</th></tr></thead><tbody>\n";
+print "<th width=\"80\"></th><th>Owner</th><th>Publication</th></tr></thead><tbody>\n";
 while ($row = mysql_fetch_assoc($result)) {
-  print "<tr>";
-  $id = stripslashes($row["id"]);
-  $uuid = stripslashes($row["uuid"]);
-  $title = stripslashes($row["title"]);
-  if ($title=="") $title="untitled";
-  print "<td><a href=\"details.php?uuid=".$uuid."\">".htmlspecialchars($title)."</a></td>";
-  $abstract = stripslashes($row["abstract"]);
-  $purpose = stripslashes($row["purpose"]);
-  $individual = stripslashes($row["individual"]);
-  if (($categoryterm!="") or ($keywordterm!="")) {
-    $source = stripslashes($row["organisation"]);
-	if ($source=="") $source = stripslashes($row["individual"]);
-	print "<td>".$source."</td>";
-  } else {
-    $category = stripslashes($row["category"]);
-    print "<td><a href=\"results.php?category=".$category."\">".$category."</a></td>";
-  }
-  $format = "...".strtolower($row["format"]);
-  $linkage = "...".strtolower($row["linkage"]);
-  print "<td>"; 
-  if ((strpos($format,'website')) or (strpos($format,'information'))) print "<img src=\"img/website.png\" alt=\"Website\" title=\"Website\" />";
-  if ((strpos($format,'service')) or (strpos($linkage,'getcapa'))) print "<img src=\"img/wms.png\" alt=\"WMS\" title=\"WMS\" />";
-  if (strpos($format,'newsfeed')) print "<a href=\"news.php?uuid=".$uuid."\"><img border=\"0\" src=\"img/newsfeed.png\" alt=\"Newsfeed\" title=\"Newsfeed\" /></a>";
-  if (strpos($linkage,'download')) print "<img src=\"img/download.png\" alt=\"Download\" title=\"Download\" />";
-  print "</td>";
-  $owner = stripslashes($row["username"]);
-  print "<td><a href=\"results.php?username=".$owner."\">".$owner."</a></td>";
-  $pubdate = stripslashes($row["pubdate"]);
-  print "<td>".date("Y-m-d",strtotime($pubdate))."</td>";
-  $keywords = stripslashes($row["keywords"]);
-  //print "<td>".$keywords."</td>";
-  $denominator = stripslashes($row["denominator"]);
-  $thumbnail = stripslashes($row["thumbnail"]);
-  $uselimitation = stripslashes($row["uselimitation"]);
-  $westbc = floatval($row["westbc"]);
-  $southbc = floatval($row["southbc"]);
-  $eastbc = floatval($row["eastbc"]);
-  $northbc = floatval($row["northbc"]);
-  $grs = stripslashes($row["grs"]);
-  print "</tr>";
-  $z++;
+	print "<tr>";
+	$id = stripslashes($row["id"]);
+	$uuid = stripslashes($row["uuid"]);
+	$title = stripslashes($row["title"]);
+	if ($title=="") $title="untitled";
+	print "<td><a href=\"details.php?uuid=".$uuid."\">".htmlspecialchars($title)."</a></td>";
+	$abstract = stripslashes($row["abstract"]);
+	$purpose = stripslashes($row["purpose"]);
+	$individual = stripslashes($row["individual"]);
+	if (($categoryterm!="") or ($keywordterm!="")) {
+		$source = stripslashes($row["organisation"]);
+		if ($source=="") $source = stripslashes($row["individual"]);
+		print "<td>".$source."</td>";
+	} else {
+		$category = stripslashes($row["category"]);
+		print "<td><a href=\"results.php?category=".$category."\">".$category."</a></td>";
+	}
+	$wms = stripslashes($row["wms"]);
+	$grs = stripslashes($row["grs"]);
+	$westbc = floatval($row["westbc"]);
+	$southbc = floatval($row["southbc"]);
+	$eastbc = floatval($row["eastbc"]);
+	$northbc = floatval($row["northbc"]);
+	$bbox="[".$westbc.",".$southbc.",".$eastbc.",".$northbc."]";
+	$owner = stripslashes($row["username"]);
+	$dataset = stripslashes($row["dataset"]);
+	$format = "...".strtolower($row["format"]);
+	$linkage = "...".strtolower($row["linkage"]);
+	print "<td>"; 
+	if ((strpos($format,'website')) or (strpos($format,'information'))) print "<img src=\"img/website.png\" alt=\"Website\" title=\"Website\" />";
+	if ((strpos($format,'service')) or (strpos($linkage,'getcapa'))) {
+		print "<a rel=\"nofollow\" href=\"wms.php?url=".urlencode($wms)."&bbox=".$bbox."&grs=".$grs."\"><img border=\"0\" src=\"img/wms.png\" alt=\"WMS\" title=\"WMS\" /></a>";
+	}
+	if (strpos($format,'newsfeed')) print "<a href=\"news.php?uuid=".$uuid."\"><img border=\"0\" src=\"img/newsfeed.png\" alt=\"Newsfeed\" title=\"Newsfeed\" /></a>";
+	if (strpos($linkage,'download')) print "<a rel=\"nofollow\" href=\"download.php?repository=".$owner."&dataset=".$dataset."\"><img src=\"img/download.png\" border=\"0\" alt=\"Download\" title=\"Download\" />";
+	print "</td>";
+	print "<td><a href=\"results.php?username=".$owner."\">".$owner."</a></td>";
+	$pubdate = stripslashes($row["pubdate"]);
+	print "<td>".date("Y-m-d",strtotime($pubdate))."</td>";
+	$keywords = stripslashes($row["keywords"]);
+	//print "<td>".$keywords."</td>";
+	$denominator = stripslashes($row["denominator"]);
+	$thumbnail = stripslashes($row["thumbnail"]);
+	$uselimitation = stripslashes($row["uselimitation"]);
+	print "</tr>";
+	$z++;
 }
 
 mysql_free_result($result);

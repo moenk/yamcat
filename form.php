@@ -127,7 +127,7 @@ Availability
 <div class="ym-fbox-text">
 <label for="format">Format<?php popuphelp("format"); ?></label>
 <?php
-$formats = array('Website','Newsfeed','Service','File Geodatabase Feature Class','Raster Dataset','Shapefile');
+$formats = array('Website','Newsfeed','Service','Download','File Geodatabase Feature Class','Raster Dataset','Shapefile');
 print "<select name=\"format\" size=\"1\">\n";
 foreach ($formats as $formatname) {
   print "<option value=\"".$formatname."\" ";
