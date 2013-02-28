@@ -17,7 +17,9 @@ include "main1.php";
 
 if (($username==$owner) or ($username=="admin")) {
   mysql_query("DELETE FROM metadata WHERE id = ".$id." ");
-  print "Record deleted from database.";
+  print "Metadata deleted from database.";
+  mysql_query("DELETE FROM news WHERE metadata_id = ".$id." ");
+  print "News deleted from database.";
 } else {
   print "You (".$username.") are not the owner (".$owner.") of this record.";
 }

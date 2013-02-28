@@ -101,7 +101,6 @@ if (($linkage!="") && ($title=="")) {
 		$area=bbox2area($northbc,$westbc,$southbc,$eastbc);
 		$pubdate=date("Y-m-d",strtotime($tags['dc_date_created']));
 		if ($pubdate=="") $pubdate=date("Y-m-d",strtotime($tags['dc_date']));
-		if ($pubdate=="1970-01-01") $pubdate=date("Y-m-d");
 		$linkage = mysql_real_escape_string($linkage);
 	}
 } else {

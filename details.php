@@ -71,7 +71,7 @@ print "<tr>";
 	print "<a href=\"".$thumbnail."\" rel=\"lightbox\" title=\"".htmlspecialchars($title)."\"><img src=\"".$thumbnail."\" border=\"0\" width=\"150\"></a>\n";
   }
   // show thumbnail of website? (iso19139 names it information, website is if metadata form website)
-  if (($websnaprkey!="") && ($thumbnail=="") && (($format=='website') or ($format=='information'))) {
+  if (($websnaprkey!="") && ($thumbnail=="") && (($format=='website') or ($format=='information') or ($format=='newsfeed'))) {
     print "<script type=\"text/javascript\">wsr_snapshot('".$linkage."', '".$websnaprkey."', 's');</script>\n";
   }
   print "</td></tr>\n";

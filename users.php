@@ -37,15 +37,15 @@ if (($name!="") && ($email!="")) {
 if (isset($_REQUEST['name'])) $name=mysql_real_escape_string($_REQUEST['name']);
 if (isset($_REQUEST['action'])) $action=$_REQUEST['action'];
 if ($action=="delete") {
-  $sql = "delete from `users` where `username`='".$name."';";
-  $result = mysql_query($sql);
-  $sql = "delete from `metadata` where `username`='".$name."';";
-  $result = mysql_query($sql);
-  if (!$result) {
-    echo "Konnte Abfrage ($sql) nicht erfolgreich ausführen von DB: " . mysql_error();
-    exit;
-  }
- 
+	// first delete all news of feed this user submitted
+	$sql="delete from news where metadata_id in (select id from metadata where username='".$name."');";
+	$result = mysql_query($sql);
+	// then delete all metadata records of this user
+	$sql = "delete from `metadata` where `username`='".$name."';";
+	$result = mysql_query($sql);
+	// at last delete user's account
+	$sql = "delete from `users` where `username`='".$name."';";
+	$result = mysql_query($sql);
 }
 
 // jetzt alle zeigen, der neue ist ggf dabei

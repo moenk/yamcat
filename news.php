@@ -11,14 +11,14 @@
 
 require_once('conf/config.php');
 include "connect.php";
+if (isset($_REQUEST['count'])) {				// get count number for any option
+	$count=intval($_REQUEST['count']);
+} else {
+	$count=40;						// los quarenta pricipales as default
+}
 
 if (isset($_REQUEST['bgcolor'])) { // iframe embedded for starting page
 	$bgcolor=$_REQUEST['bgcolor'];
-	if (isset($_REQUEST['count'])) {
-		$count=intval($_REQUEST['count']);
-	} else {
-		$count=40;						// los quarenta pricipales as default
-	}
 	print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -27,6 +27,7 @@ if (isset($_REQUEST['bgcolor'])) { // iframe embedded for starting page
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
 </head>
 <body bgcolor="#'.$bgcolor.'" text="black" link="black" vlink="dimgray" alink="black">
+<script type="text/javascript" src="http://apis.google.com/js/plusone.js">{lang: \'de\', parsetags: \'explicit\'}</script>
 <div style="font-size:smaller">
 <table border="0" width="100%">
 ';
@@ -45,41 +46,46 @@ if (isset($_REQUEST['bgcolor'])) { // iframe embedded for starting page
 		print "<td><a href='$adresse' rel='nofollow' target='_blank'>$titel</a></td>\n";
 		$feed=htmlspecialchars(substr($row['feed'],0,40));
 		print "<td><a href=\"details.php?uuid=".$row['uuid']."\" target=\"_blank\"><em>$feed</em></a></td>\n";
+		print '<td><g:plusone href="'.$adresse.'" size="small"></g:plusone></td>';
 		print "</tr>\n";
 		$i++;
 	}
 	print '</table>
 </div>
+<script type="text/javascript">gapi.plusone.go();</script>
 </body>
 </html>
 ';
 }
 
-if (isset($_REQUEST['update'])) { // just do the aggregation of all newsfeeds
+if (isset($_REQUEST['update'])) { // just do the aggregation of all newsfeeds, also fixes title, abstract and authorname
 	require_once('external/simplepie/autoloader.php');
-	print "<html>\n<body>\n";
-	print "<h1>Updating Newsfeeds...</h1>";
-	$sql="select * from metadata where format='Newsfeed';";
+	$subtitle=$title;
+	$title="Update newsfeeds...";
+	include("header.php");
+	include("navigation.php");
+	include("main1.php");
+	$sql="select * from metadata where format='Newsfeed' order by pubdate desc;";
 	$result=mysql_query($sql);
 	while ($row=mysql_fetch_array($result)) {
 		$lastpubdate=trim(stripslashes($row["pubdate"]));
 		$id=intval($row['id']);
+		$uuid=trim($row['uuid']);
 		$feed = new SimplePie();
 		$feed->set_cache_location('files');
 		$feed->set_feed_url($row['linkage']);
 		$feed->init();
 		$feed->handle_content_type();
 		$title=$feed->get_title();
-		print "<h2>".$row['title']."</h2>\n";
+		print "<h3>".$row['title']."</h3>\n";
 		$subtitle=$feed->get_description();
 		print '<ul>';
 		foreach ($feed->get_items() as $item):
-			$newstitle=(string)$item->get_title();
+			$newstitle=html_entity_decode($item->get_title(),ENT_NOQUOTES, 'UTF-8');
 			print '<li>'.$newstitle;
-			$description=(string)$item->get_description();
+			$description=html_entity_decode($item->get_description(),ENT_NOQUOTES, 'UTF-8');
 			$link=(string)$item->get_permalink();
 			$pubdate=(string)$item->get_date("Y-m-d H:i");
-			if ($pubdate>$maxpubdate) $maxpubdate=$pubdate;			// to find newest pubdate
 			print ', '.$pubdate;
 			if ($pubdate>$lastpubdate) {							// this is a new posting? insert it to database
 				$sql = "INSERT INTO news (metadata_id, pubdate, title, link, description) ".
@@ -93,28 +99,50 @@ if (isset($_REQUEST['update'])) { // just do the aggregation of all newsfeeds
 			} else {
 				print ", <font color=\"#FF0000\">OLD!</font>";
 			}
-			print "</li>";
-			endforeach;
-		print "</ul>";
-		// there was a new posting?
-		if ($maxpubdate>$lastpubdate) {
-			$sql="update metadata set pubdate=\"".mysql_real_escape_string($maxpubdate)."\" where id=".$id.";";
+			print "</li>\n";
+		endforeach;
+		// set pubdate in metadata to latest news, let the database do this
+		$sql="update metadata set pubdate=(select max(pubdate) from news where metadata_id='".$id."') where id='".$id."';";
+		$result2 = mysql_query($sql);
+		// there was a new title?
+		$title=html_entity_decode($feed->get_title(),ENT_NOQUOTES, 'UTF-8');
+		if ($title!=$row['title']) {
+			$sql="update metadata set title='".mysql_real_escape_string($title)."' where id=".$id.";";
 			$result2 = mysql_query($sql);
 		}
+		// there was a new abstract?
+		$subtitle=html_entity_decode($feed->get_description(),ENT_NOQUOTES, 'UTF-8');
+		if ($subtitle!=$row['abstract']) {
+			$sql="update metadata set abstract='".mysql_real_escape_string($subtitle)."' where id=".$id.";";
+			$result2 = mysql_query($sql);
+		}
+		// if there is an author and there was a change in auothor's name
+		if ($author = $feed->get_author()) {
+			$organisation=html_entity_decode($author->get_name(),ENT_NOQUOTES, 'UTF-8');
+			if ($organisation!=$row['organisation']) {
+				$sql="update metadata set organisation='".mysql_real_escape_string($organisation)."' where id=".$id.";";
+				$result2 = mysql_query($sql);
+			}
+		}	
+		// and done, kill this instance
 		unset($feed);
+		print "</ul>\n";
+		print '<p><a href="news.php?uuid='.$uuid.'" class="ym-button ym-play">News</a>';
 	}
+	// next newsfeed!
+	include "main2.php";
+	include "footer.php";
 }
 
-if (isset($_REQUEST['uuid'])) { // standalone, display feed and update database
+if (isset($_REQUEST['uuid'])) { // standalone, get & display feed, with enclosures, update keywords with glued sorted categories
 	session_start();
 	require_once('external/simplepie/autoloader.php');
 	$uuid=trim(mysql_real_escape_string($_REQUEST['uuid']));
-	$sql="SELECT id,title,pubdate,keywords,linkage FROM metadata where uuid='".$uuid."';";
+	$sql="SELECT * FROM metadata where uuid='".$uuid."';";
 	$result = mysql_query($sql);
 	$row = mysql_fetch_assoc($result);
 	$id=intval($row["id"]);
 	$linkage=trim(stripslashes($row["linkage"]));
-	$lastpubdate=trim(stripslashes($row["pubdate"]));
 	$oldkeywords=trim(stripslashes($row["keywords"]));
 	mysql_free_result($result);
 	$feed = new SimplePie();
@@ -122,43 +150,40 @@ if (isset($_REQUEST['uuid'])) { // standalone, display feed and update database
 	$feed->set_feed_url($linkage);
 	$feed->init();
 	$feed->handle_content_type();
-	$title=$feed->get_title();
-	$subtitle=$feed->get_description();
+	$title=strip_tags($feed->get_title());
+	$subtitle=substr(strip_tags($feed->get_description(),0,80));
 	include("header.php");
 	include("navigation.php");
 	include("main1.php");
-	$maxpubdate="";												// to find out newest pubdate
 	$keywords=explode(",",str_replace(", ",",",$oldkeywords));	// here we add all keywords for this feed
 	foreach ($feed->get_items() as $item):
+		$newstitle=strip_tags($item->get_title());
+		$description=strip_tags($item->get_description(),"<p><br>");
+		$link=strip_tags($item->get_permalink());
+		$pubdate=strip_tags($item->get_date("Y-m-d H:i"));
+		$jumper=substr(md5($link),0,4);						// create jump anchor
 		print '<div class="item">';
-		$newstitle=(string)$item->get_title();
+		print '<a name="'.$jumper.'"></a>';
 		print '<h3>'.$newstitle.'</h3>';
-		$description=(string)$item->get_description();
 		// print content with invalidated links - you never know what bloggers will post ;-)
-		print '<p>'.str_replace("<a href=","<a rel=\"nofollow\" href=",$description).'</p>';
-		print "\n";
-		$link=(string)$item->get_permalink();
-		$pubdate=(string)$item->get_date("Y-m-d H:i");
-		if ($pubdate>$maxpubdate) $maxpubdate=$pubdate;			// to find newest pubdate
-		print '<p><a href="'.$link.'" class="ym-button ym-play">Read</a>';
+		// print '<p>'.str_replace("<a href=","<a rel=\"nofollow\" href=",$description).'</p>';
+		print "<p>".$description."</p>\n";
+		if ($enclosure = $item->get_enclosure()) {
+			echo $enclosure->native_embed(array(
+				'audio' => 'external/simplepie/demo/for_the_demo/place_audio.png',
+				'video' => 'external/simplepie/demo/for_the_demo/place_audio.png',
+				'mediaplayer' => 'external/simplepie/demo/for_the_demo/mediaplayer.swf'
+			));
+		}
+		print '<p><a href="'.$link.'" rel="nofollow" class="ym-button ym-play">Read</a>';
 		print "catgories: ";
-		foreach ($item->get_categories() as $category)
-		{
+		foreach ($item->get_categories() as $category) {
 			$keyword=$category->get_label();
 			array_push($keywords,$keyword);
 			print "<a href=\"results.php?keyword=".$keyword."\">".$keyword."</a> ";
 		}
 		print ' &bull; pubdate: '.$pubdate.'</small></p>';
 		print "</div>";
-		if ($pubdate>$lastpubdate) {							// this is a new posting? insert it to database
-			$sql = "INSERT INTO news (metadata_id, pubdate, title, link, description) ".
-			"VALUES ('".strval($id)."', '".
-			mysql_real_escape_string($pubdate)."', '".
-			mysql_real_escape_string($newstitle)."', '".
-			mysql_real_escape_string($link)."', '".
-			mysql_real_escape_string($description)."');";
-			$result = mysql_query($sql);
-		}
 	endforeach;
 	// now glue all unique keywords together
 	$keywords=array_unique($keywords);
@@ -168,18 +193,48 @@ if (isset($_REQUEST['uuid'])) { // standalone, display feed and update database
 		$sql="update metadata set keywords=\"".mysql_real_escape_string($newkeywords)."\" where id=".$id.";";
 		$result = mysql_query($sql);
 	}
-	// there was a new posting?
-	if ($maxpubdate>$lastpubdate) {
-		$sql="update metadata set pubdate=\"".mysql_real_escape_string($maxpubdate)."\" where id=".$id.";";
-		$result = mysql_query($sql);
-	}
-	// there was a new title?
-	if ($title!=$row['title']) {
-		$sql="update metadata set title='".mysql_real_escape_string($title)."' where id=".$id.";";
-		$result = mysql_query($sql);
-	}
 	// and done.
 	include("main2.php");
 	include("footer.php");
 } // end of standalone
+
+if ((!isset($_REQUEST['uuid'])) && (!isset($_REQUEST['bgcolor'])) && (!isset($_REQUEST['update']))) {	// just the news overview
+	session_start();
+	$subtitle=$title;
+	$title="Newsfeeds";
+	include("header.php");
+	include("navigation.php");
+	include("main1.php");
+	print "<h3>
+Newsfeeds
+</h3>
+";
+	$sql="select n.id, n.title, m.title as feed, m.uuid, n.pubdate, n.link from news as n inner join metadata as m on (n.metadata_id=m.id) order by pubdate desc limit ".$count.";";
+	$result = mysql_query($sql);
+	print "<table><tbody>\n";
+	while ($row = mysql_fetch_assoc($result)) {
+		$datum=$row['pubdate'];
+		$adresse=$row['link'];
+		$datum=substr($datum,0,16);
+		$jumper=substr(md5($adresse),0,4);				// cearte jump anchor
+		$datum=str_replace(" ","&nbsp;",$datum);
+		print "<tr>\n";
+		$id=$row['id'];
+		$uuid=$row['uuid'];
+		$titel=$row['title'];
+		if ($titel=="") $titel="?";
+		$titel=substr($titel,0,80);
+		$titel=htmlspecialchars($titel);
+		$blog=$row['feed'];
+		$blog=substr($blog,0,40);
+		$blog=htmlspecialchars($blog);
+		print "<td><i>".$datum."</i></td>\n";	print "<td><b>".$blog."</b></td>\n";
+		print "<td><a href='news.php?uuid=".$uuid."#".$jumper."' >".$titel."</a></td>\n";
+		print "</tr>\n";
+	}
+	print "</tbody></table>\n";
+	print '<p><a href="news.php?update" rel="nofollow" class="ym-button ym-play">Update</a>';
+	include "main2.php";
+	include "footer.php";
+}														// end of overview
 ?>

@@ -7,6 +7,7 @@
 print "<li><a href=\"".$domainroot."\">Start</a></li>\n";
 print "<li><a href=\"search.php\">Search</a></li>\n";
 print "<li><a href=\"new_links.php\">New entries</a></li>\n";
+print "<li><a href=\"news.php\">Newsfeeds</a></li>\n";
 if (isset($_SESSION['logged_in'])) {
 	print "<li><a href=\"files.php\">My geodata</a></li>\n";
 	print "<li><a href=\"results.php?username=".$username."\">My metadata</a></li>\n";

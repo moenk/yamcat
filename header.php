@@ -7,6 +7,9 @@
 	<!-- Meta Information Block -->
 	<meta name="keywords" content="<?php print str_replace(" ",",",$title." ".$subtitle); ?>">
 	<meta name="description" content="<?php print $title." - ".$subtitle; ?>">
+	<link rel="alternate" type="application/rss+xml" title="GeoRSS" href="<? print $domainroot; ?>georss.php" />
+	<link rel="alternate" type="application/rss+xml" title="GeoRSS News" href="<? print $domainroot; ?>georss.php?data=news" />
+	<link rel="alternate" type="application/rss+xml" title="GeoRSS Metadata" href="<? print $domainroot; ?>georss.php?data=meta" />
 	
 	<!-- Mobile viewport optimisation -->
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">

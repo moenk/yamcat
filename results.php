@@ -1,4 +1,12 @@
 <?php
+//
+//	file: results.php
+//
+//	coder: moenk
+//
+//	purpose: display search results of search issued from search.php
+//
+
 session_start(); // auch hier kein dbauth!
 include "conf/config.php";
 
@@ -9,7 +17,11 @@ $start=floatval($_REQUEST['start']);
 $anzahl=30;
 
 include("connect.php");
-$searchterm=trim(mysql_real_escape_string($_REQUEST['searchterm']));
+if (isset($_REQUEST['searchterm'])) {
+	$searchterm=trim(mysql_real_escape_string($_REQUEST['searchterm']));
+	$searchterm=str_replace("_"," ",$searchterm);
+	$subtitle=htmlspecialchars($searchterm);
+}	
 $titleterm=trim(mysql_real_escape_string($_REQUEST['titleterm']));
 $keywordterm=trim(mysql_real_escape_string($_REQUEST['keyword']));
 $categoryterm=trim(mysql_real_escape_string($_REQUEST['category']));
@@ -100,7 +112,7 @@ while ($row = mysql_fetch_assoc($result)) {
 		print "<a rel=\"nofollow\" href=\"wms.php?url=".urlencode($wms)."&bbox=".$bbox."&grs=".$grs."\"><img border=\"0\" src=\"img/wms.png\" alt=\"WMS\" title=\"WMS\" /></a>";
 	}
 	if (strpos($format,'newsfeed')) print "<a href=\"news.php?uuid=".$uuid."\"><img border=\"0\" src=\"img/newsfeed.png\" alt=\"Newsfeed\" title=\"Newsfeed\" /></a>";
-	if (strpos($linkage,'download')) print "<a rel=\"nofollow\" href=\"download.php?repository=".$owner."&dataset=".$dataset."\"><img src=\"img/download.png\" border=\"0\" alt=\"Download\" title=\"Download\" />";
+	if ($dataset!="") print "<a rel=\"nofollow\" href=\"download.php?repository=".$owner."&dataset=".$dataset."\"><img src=\"img/download.png\" border=\"0\" alt=\"Download\" title=\"Download\" />";
 	print "</td>";
 	print "<td><a href=\"results.php?username=".$owner."\">".$owner."</a></td>";
 	$pubdate = stripslashes($row["pubdate"]);
