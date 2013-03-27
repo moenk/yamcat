@@ -8,7 +8,11 @@
 //
 
 session_start();											// needed for checking logged in username, no dbauth, this is public!
-$username=$_SESSION['username'];							// used later for owner-checking
+if(isset($_SESSION['username'])) {
+	$username=$_SESSION['username'];						// used later for owner-checking
+} else {
+	$username="";
+}
 
 include "conf/config.php";
 include "connect.php";
@@ -45,7 +49,9 @@ print "<tr>";
   $title=stripslashes($row["title"]);
   print "<tr><td width=\"38%\">Title</td><td><b>".htmlspecialchars($title)."</b></td></tr>";
   $pubdate = stripslashes($row["pubdate"]);
-  print "<tr><td>Publication</td><td>".date("Y-m-d",strtotime($pubdate))."</td></tr>";
+  print "<tr><td>Publication</td><td>".date("Y-m-d H:i",strtotime($pubdate))."</td></tr>";
+  $moddate = stripslashes($row["moddate"]);
+  print "<tr><td>Modification</td><td>".date("Y-m-d H:i",strtotime($moddate))."</td></tr>";
   $category=stripslashes($row["category"]);
   print "<tr><td width=\"38%\">Category</td><td><b>".htmlspecialchars($category)."</b></td></tr>";
   $abstract = stripslashes($row["abstract"]);
@@ -72,6 +78,7 @@ print "<tr>";
   }
   // show thumbnail of website? (iso19139 names it information, website is if metadata form website)
   if (($websnaprkey!="") && ($thumbnail=="") && (($format=='website') or ($format=='information') or ($format=='newsfeed'))) {
+	print "<script type=\"text/javascript\" src=\"http://www.websnapr.com/js/websnapr.js\"></script>\n";
     print "<script type=\"text/javascript\">wsr_snapshot('".$linkage."', '".$websnaprkey."', 's');</script>\n";
   }
   print "</td></tr>\n";
@@ -188,7 +195,7 @@ Geographic Extent
 print "<h3>Distribution</h3>";
 print "<table>\n";
 
-print "<tr><td>UUID</td><td>".$uuid."</td></tr>\n";
+print "<tr><td>UUID</td><td><a href=\"metadata.php?uuid=".$uuid."\">".$uuid."</a></td></tr>\n";
 print "<tr><td>Format</td><td>".ucwords($format)."</td></tr>\n";
 
 if (substr($grs,0,5)=="EPSG:") {
@@ -204,7 +211,7 @@ foreach ($linkages as $linkage) {
 print "</td></tr>\n";
 
 $source = trim(stripslashes($row["source"]));
-print "<tr><td>Metadata</td><td><a href=\"".$domainroot.$source."\">".basename($source)."</a></td></tr>\n";
+// print "<tr><td>Metadata</td><td><a href=\"".$domainroot.$source."\">".basename($source)."</a></td></tr>\n";
 mysql_free_result($result);
 
 if (($showcontact==1) or ($username=="admin")) {

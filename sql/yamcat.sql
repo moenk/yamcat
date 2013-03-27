@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS `metadata` (
   `peer_id` int(11) NOT NULL,
   `title` varchar(255) NOT NULL DEFAULT '',
   `pubdate` datetime NOT NULL,
+  `moddate` datetime NOT NULL,
   `abstract` text NOT NULL,
   `purpose` text NOT NULL,
   `individual` varchar(255) NOT NULL DEFAULT '',

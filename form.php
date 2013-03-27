@@ -1,4 +1,13 @@
 <?php
+//
+//	file: form.php
+//
+//	coder: moenk
+//
+//	purpose: displays a form with the values of metadata
+//
+//	included by: edit.php
+//
 include "popup.php";
 ?>
 
@@ -26,7 +35,13 @@ include "catselect.php";
 <div class="ym-fbox-text">
 <label for="pubdate">Publication date<?php popuphelp("pubdate"); ?></label>
 <input name="pubdate" maxlength="" type="text" value="<?php echo $pubdate; ?>">
-<input name="peer_1" type="hidden" value="-1">
+<input name="peer_id" type="hidden" value="-1">
+</div>
+
+<?php if ($moddate=="") $moddate=date("Y-m-d"); ?>
+<div class="ym-fbox-text">
+<label for="moddate">Modification date<?php popuphelp("pubdate"); ?></label>
+<input name="moddate" maxlength="" type="text" value="<?php echo $moddate; ?>">
 </div>
 
 <div class="ym-fbox-text">

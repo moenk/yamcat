@@ -23,12 +23,6 @@
 	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
 	<![endif]-->
 
-	<?php
-	if ($websnaprkey!="") {
-		print "<script type=\"text/javascript\" src=\"http://www.websnapr.com/js/websnapr.js\"></script>\n";
-	}
-	?>
-
 	<script src="external/lightbox/js/jquery-1.7.2.min.js"></script>
 	<script src="external/lightbox/js/lightbox.js"></script>
 	<link href="external/lightbox/css/lightbox.css" rel="stylesheet" />

@@ -18,11 +18,19 @@ include "main1.php";
 
 $uuid = trim(mysql_real_escape_string($_POST["uuid"]));
 $title = trim(mysql_real_escape_string($_POST["title"]));
+// no pubdate from future
 $pubdate=$_POST["pubdate"];
 if (strtotime($pubdate)>time()) {
 	$pubdate=date("Y-m-d");
 } else {
 	$pubdate = trim(mysql_real_escape_string($pubdate));
+}
+// no update from future
+$moddate=$_POST["moddate"];
+if (strtotime($moddate)>time()) {
+	$moddate=date("Y-m-d");
+} else {
+	$moddate = trim(mysql_real_escape_string($moddate));
 }
 $category = trim(mysql_real_escape_string($_POST["category"]));
 $abstract = trim(mysql_real_escape_string($_POST["abstract"]));
@@ -46,7 +54,7 @@ $grs = trim(mysql_real_escape_string($_POST["grs"]));
 
 if (($username==$owner) or ($username=="admin")) {
 	// update only fields user are allowed to change, no uuid, no owner!
-	$sql="UPDATE metadata SET title = '$title', pubdate = '$pubdate', category = '$category', abstract = '$abstract', purpose = '$purpose',  individual = '$individual', organisation = '$organisation', city = '$city', keywords = '$keywords', denominator = '$denominator',  thumbnail = '$thumbnail', uselimitation = '$uselimitation', westbc = '$westbc', southbc = '$southbc', eastbc = '$eastbc', northbc = '$northbc',area = '$area', linkage = '$linkage', grs = '$grs', format = '$format' WHERE id = '$id' ";
+	$sql="UPDATE metadata SET title = '$title', pubdate = '$pubdate', moddate = '$moddate', category = '$category', abstract = '$abstract', purpose = '$purpose',  individual = '$individual', organisation = '$organisation', city = '$city', keywords = '$keywords', denominator = '$denominator',  thumbnail = '$thumbnail', uselimitation = '$uselimitation', westbc = '$westbc', southbc = '$southbc', eastbc = '$eastbc', northbc = '$northbc',area = '$area', linkage = '$linkage', grs = '$grs', format = '$format' WHERE id = '$id' ";
 	$result = mysql_query($sql);
 
 	if($result) { 

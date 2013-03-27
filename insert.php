@@ -9,11 +9,19 @@ include "main1.php";
 $username=trim(mysql_real_escape_string($_SESSION['username']));
 $uuid = trim(mysql_real_escape_string($_POST["uuid"]));
 $title = trim(mysql_real_escape_string($_POST["title"]));
+// no pubdate from future
 $pubdate=$_POST["pubdate"];
 if (strtotime($pubdate)>time()) {
 	$pubdate=date("Y-m-d");
 } else {
 	$pubdate = trim(mysql_real_escape_string($pubdate));
+}
+// no update from future
+$moddate=$_POST["moddate"];
+if (strtotime($moddate)>time()) {
+	$moddate=date("Y-m-d");
+} else {
+	$moddate = trim(mysql_real_escape_string($moddate));
 }
 $abstract = trim(mysql_real_escape_string($_POST["abstract"]));
 $purpose = trim(mysql_real_escape_string($_POST["purpose"]));
@@ -122,7 +130,7 @@ if (($uuid!=="") or ($title!=="")) {
 	// local peer id
 	$peer_id=-1;
 	// now let's go insert data to the database
-	$sql="INSERT INTO metadata (id, uuid, peer_id, title, pubdate, abstract, purpose, individual, category, format, organisation, city, keywords, denominator, thumbnail, uselimitation, westbc, southbc, eastbc, northbc, area, linkage, grs, username) VALUES ('', '".$uuid."', ".$peer_id.", '".$title."', '".$pubdate."', '".$abstract."', '".$purpose."', '".$individual."', '".$category."', '".$format."', '".$organisation."', '".$city."', '".$keywords."', '".$denominator."', '".$thumbnail."', '".$uselimitation."', ".$westbc.", ".$southbc.", ".$eastbc.", ".$northbc.", ".$area.", '".$linkage."', '".$grs."', '".$username."')";
+	$sql="INSERT INTO metadata (id, uuid, peer_id, title, pubdate, moddate, abstract, purpose, individual, category, format, organisation, city, keywords, denominator, thumbnail, uselimitation, westbc, southbc, eastbc, northbc, area, linkage, grs, username) VALUES ('', '".$uuid."', ".$peer_id.", '".$title."', '".$pubdate."', '".$moddate."', '".$abstract."', '".$purpose."', '".$individual."', '".$category."', '".$format."', '".$organisation."', '".$city."', '".$keywords."', '".$denominator."', '".$thumbnail."', '".$uselimitation."', ".$westbc.", ".$southbc.", ".$eastbc.", ".$northbc.", ".$area.", '".$linkage."', '".$grs."', '".$username."')";
 
 	$results = mysql_query($sql);
 	if($results) { 

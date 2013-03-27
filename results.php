@@ -32,9 +32,36 @@ $lat=floatval($_REQUEST['lat']);
 $param="?";
 $sql="SELECT * FROM metadata order by pubdate desc limit $start,$anzahl;";
 if ($searchterm!="") {
-  $sql="SELECT * FROM metadata where MATCH (title,abstract,purpose,keywords) AGAINST ('".$searchterm."') limit $start,$anzahl;";
-  // print $sql;
-  $param.="searchterm=".$searchterm."&";
+	$sql='SELECT * ,
+MATCH (
+title, abstract, purpose, keywords
+)
+AGAINST (
+"'.$searchterm.'"
+IN BOOLEAN
+MODE
+) AS relevance
+FROM metadata
+WHERE MATCH (
+title, abstract, purpose, keywords
+)
+AGAINST (
+"'.$searchterm.'"
+IN BOOLEAN
+MODE
+)
+HAVING Relevance > 0.2
+ORDER BY relevance,pubdate DESC
+LIMIT '.$start.','.$anzahl.';';
+	// print $sql;
+  
+	if (strlen($searchterm)<4) {					// mysql fulltext search does not work when 1 to 3 chars
+		$sql="SELECT * FROM `metadata` 
+WHERE `title` like '%".$searchterm."%' 
+OR `abstract` like '%".$searchterm."%' 
+order by pubdate desc limit $start,$anzahl;";
+	}
+	$param.="searchterm=".$searchterm."&";
 }  
 if ($titleterm!="") {
   $sql="SELECT * FROM `metadata` WHERE `title` like '%".$titleterm."%' order by pubdate desc limit $start,$anzahl;";

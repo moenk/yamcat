@@ -56,25 +56,28 @@ if (!$result) {
     exit;
 }
 if (mysql_num_rows($result) == 0) {
-    echo "No users found.";
+		echo "No users found.";
 } else {
-  print "<table><thead><tr><th>Username</th><th>eMail</th><th>Records</th><th>Action</th></tr></thead><tbody>\n";
-  while ($row = mysql_fetch_assoc($result)) {
-    print "<tr>";
-    $name = stripslashes($row["username"]);
-    $email = stripslashes($row["email"]);
-    $anzahl = intval($row["anzahl"]);
-    print "<td>".htmlspecialchars($name)."</td>";
-    print "<td>".make_clickable($email)."</td>";
-	print "<td><a class=\"ym-button ym-next\" href=\"results.php?username=".$name."\">".$anzahl."</a></td>";
-    print "<td>";
-	print "<a class=\"ym-button ym-delete\" href=\"users.php?action=delete&name=".$name."\">Delete</a>";
-	print "</td>";
-    print "</tr>";
-  }
+	$z=0;
+	print "<table><thead><tr><th>Username</th><th>eMail</th><th>Records</th><th>Action</th></tr></thead><tbody>\n";
+	while ($row = mysql_fetch_assoc($result)) {
+		$z++;
+		print "<tr>";
+		$name = stripslashes($row["username"]);
+		$email = stripslashes($row["email"]);
+		$anzahl = intval($row["anzahl"]);
+		print "<td>".htmlspecialchars($name)."</td>";
+		print "<td>".make_clickable($email)."</td>";
+		print "<td><a class=\"ym-button ym-next\" href=\"results.php?username=".$name."\">".$anzahl."</a></td>";
+		print "<td>";
+		print "<a class=\"ym-button ym-delete\" href=\"users.php?action=delete&name=".$name."\">Delete</a>";
+		print "</td>";
+		print "</tr>";
+	}
+	print "</tbody></table>\n";
+	print "<i>".$z." users.</i>\n";
 }
 mysql_free_result($result);
-print "</tbody></table>\n";
 ?>
 
 <h3>

@@ -8,7 +8,7 @@
 //	purpose: create feed news with co-ordinates from metadata according to georss
 //
 
-header ("Content-Type:text/xml");
+header('Content-Type:text/xml; charset="utf-8"');
 include "conf/config.php";
 include "connect.php";
 
@@ -30,7 +30,7 @@ print '<?xml version="1.0"?>
   <channel>
      <title>'.$title.'</title>
      <description>'.$subtitle.'</description>
-     <link>h'.$domainroot.'</link>
+     <link>'.$domainroot.'news.php</link>
      <dc:publisher>'.$mailfrom.'</dc:publisher>
      <pubDate>'.date("r").'</pubDate>
 ';
@@ -61,12 +61,16 @@ while ($row = mysql_fetch_assoc($result)) {
 	} else {
 		$script="details.php";
 	}
+	$title=$row["title"];
+	$author=$row["author"];
+	if ($author!="") $title = $author.": ".$title;
 	print '     <item>
+		<guid isPermaLink="false">'.md5($row["link"]).'</guid>
 		<pubDate>'.date("r",strtotime($row["pubdate"])).'</pubDate>
-		<title>'.$row["title"].'</title>
+		<title><![CDATA['.$title.']]></title>
 		<description><![CDATA['.strip_tags($row["description"]).']]></description>
 		<link>'.$domainroot.$script.'?uuid='.$row["uuid"].'#'.substr(md5($row["link"]),0,4).'</link>
-		<author>'.$row["author"].'</author>
+		<author>'.htmlspecialchars($author, ENT_QUOTES | "ENT_XML1", "UTF-8").'</author>
 		<geo:lat>'.$row["lat"].'</geo:lat>
 		<geo:long>'.$row["lon"].'</geo:long>
      </item>

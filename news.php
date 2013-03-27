@@ -6,7 +6,7 @@
 //
 //	purpose: 	reads news from a newsfeed with simplepie and displays them
 //				updates news table with new entries 
-//				updates keywords and pubdate in metadata
+//				updates keywords and moddate in metadata
 //
 
 require_once('conf/config.php');
@@ -14,7 +14,7 @@ include "connect.php";
 if (isset($_REQUEST['count'])) {				// get count number for any option
 	$count=intval($_REQUEST['count']);
 } else {
-	$count=40;						// los quarenta pricipales as default
+	$count=10;						// top ten as default
 }
 
 if (isset($_REQUEST['bgcolor'])) { // iframe embedded for starting page
@@ -65,10 +65,10 @@ if (isset($_REQUEST['update'])) { // just do the aggregation of all newsfeeds, a
 	include("header.php");
 	include("navigation.php");
 	include("main1.php");
-	$sql="select * from metadata where format='Newsfeed' order by pubdate desc;";
+	$sql="select * from metadata where format='Newsfeed' order by moddate desc;";
 	$result=mysql_query($sql);
 	while ($row=mysql_fetch_array($result)) {
-		$lastpubdate=trim(stripslashes($row["pubdate"]));
+		$lastpubdate=trim(stripslashes($row["moddate"]));
 		$id=intval($row['id']);
 		$uuid=trim($row['uuid']);
 		$feed = new SimplePie();
@@ -88,6 +88,11 @@ if (isset($_REQUEST['update'])) { // just do the aggregation of all newsfeeds, a
 			$pubdate=(string)$item->get_date("Y-m-d H:i");
 			print ', '.$pubdate;
 			if ($pubdate>$lastpubdate) {							// this is a new posting? insert it to database
+				// delete news to avoid duplicates in feed or allow updates
+				$sql = 'delete from news where pubdate="'.$pubdate.'" and metadata_id="'.strval($id).'";';
+				$result2 = mysql_query($sql);
+				if (mysql_affected_rows()>0) print ", <font color=\"#0000FF\">DUPE</font>";
+				// and insert new entry
 				$sql = "INSERT INTO news (metadata_id, pubdate, title, link, description) ".
 				"VALUES ('".strval($id)."', '".
 				mysql_real_escape_string($pubdate)."', '".
@@ -101,8 +106,8 @@ if (isset($_REQUEST['update'])) { // just do the aggregation of all newsfeeds, a
 			}
 			print "</li>\n";
 		endforeach;
-		// set pubdate in metadata to latest news, let the database do this
-		$sql="update metadata set pubdate=(select max(pubdate) from news where metadata_id='".$id."') where id='".$id."';";
+		// set moddate in metadata to latest news, let the database do this
+		$sql="update metadata set moddate=(select max(pubdate) from news where metadata_id='".$id."') where id='".$id."';";
 		$result2 = mysql_query($sql);
 		// there was a new title?
 		$title=html_entity_decode($feed->get_title(),ENT_NOQUOTES, 'UTF-8');
@@ -167,7 +172,8 @@ if (isset($_REQUEST['uuid'])) { // standalone, get & display feed, with enclosur
 		print '<h3>'.$newstitle.'</h3>';
 		// print content with invalidated links - you never know what bloggers will post ;-)
 		// print '<p>'.str_replace("<a href=","<a rel=\"nofollow\" href=",$description).'</p>';
-		print "<p>".$description."</p>\n";
+		// limit to 160 chars according to german "Leistungsschtzrecht"
+		print "<p>".substr($description,0,160)."...</p>\n";
 		if ($enclosure = $item->get_enclosure()) {
 			echo $enclosure->native_embed(array(
 				'audio' => 'external/simplepie/demo/for_the_demo/place_audio.png',
@@ -175,8 +181,10 @@ if (isset($_REQUEST['uuid'])) { // standalone, get & display feed, with enclosur
 				'mediaplayer' => 'external/simplepie/demo/for_the_demo/mediaplayer.swf'
 			));
 		}
-		print '<p><a href="'.$link.'" rel="nofollow" class="ym-button ym-play">Read</a>';
-		print "catgories: ";
+		print "<p>\n";
+		print '<a href="details.php?uuid='.$uuid.'" class="ym-button ym-next">Details</a>';
+		print '<a href="'.$link.'" rel="nofollow" class="ym-button ym-play">Article</a>';
+		print "categories: ";
 		foreach ($item->get_categories() as $category) {
 			$keyword=$category->get_label();
 			array_push($keywords,$keyword);
@@ -205,10 +213,10 @@ if ((!isset($_REQUEST['uuid'])) && (!isset($_REQUEST['bgcolor'])) && (!isset($_R
 	include("header.php");
 	include("navigation.php");
 	include("main1.php");
-	print "<h3>
-Newsfeeds
-</h3>
-";
+	print '<h3>
+	Newsfeeds
+	</h3>
+	<script type="text/javascript" src="http://apis.google.com/js/plusone.js">{lang: \'de\', parsetags: \'explicit\'}</script>';
 	$sql="select n.id, n.title, m.title as feed, m.uuid, n.pubdate, n.link from news as n inner join metadata as m on (n.metadata_id=m.id) order by pubdate desc limit ".$count.";";
 	$result = mysql_query($sql);
 	print "<table><tbody>\n";
@@ -228,12 +236,16 @@ Newsfeeds
 		$blog=$row['feed'];
 		$blog=substr($blog,0,40);
 		$blog=htmlspecialchars($blog);
-		print "<td><i>".$datum."</i></td>\n";	print "<td><b>".$blog."</b></td>\n";
+		print "<td><i>".$datum."</i></td>\n";	
+		print "<td><b><a href='details.php?uuid=".$uuid."' >".$blog."</a></b></td>\n";
 		print "<td><a href='news.php?uuid=".$uuid."#".$jumper."' >".$titel."</a></td>\n";
+		// getting social ;-)
+		print '<td><g:plusone href="'.$adresse.'" size="medium"></g:plusone></td>';
 		print "</tr>\n";
 	}
 	print "</tbody></table>\n";
-	print '<p><a href="news.php?update" rel="nofollow" class="ym-button ym-play">Update</a>';
+	print '<p><a href="news.php?update" rel="nofollow" class="ym-button ym-play">Update</a>
+	<script type="text/javascript">gapi.plusone.go();</script>';
 	include "main2.php";
 	include "footer.php";
 }														// end of overview
