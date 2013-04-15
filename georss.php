@@ -68,7 +68,7 @@ while ($row = mysql_fetch_assoc($result)) {
 		<guid isPermaLink="false">'.md5($row["link"]).'</guid>
 		<pubDate>'.date("r",strtotime($row["pubdate"])).'</pubDate>
 		<title><![CDATA['.$title.']]></title>
-		<description><![CDATA['.strip_tags($row["description"]).']]></description>
+		<description><![CDATA['.substr(strip_tags($row["description"]),0,160).'...]]></description>
 		<link>'.$domainroot.$script.'?uuid='.$row["uuid"].'#'.substr(md5($row["link"]),0,4).'</link>
 		<author>'.htmlspecialchars($author, ENT_QUOTES | "ENT_XML1", "UTF-8").'</author>
 		<geo:lat>'.$row["lat"].'</geo:lat>

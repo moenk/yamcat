@@ -33,6 +33,9 @@ $user='geouser';
 $pass='geopass';
 $dbase='geobase';
 
+// if export to GeoNetwork is required add PostGIS connection here, set empty if not
+$geonetwork = "host=localhost port=5432 dbname=geonetwork user=postgres password=secret";
+
 // Self Registration: 1 to enable, 0 to disable
 $registration = 1;
 

@@ -18,9 +18,10 @@
 //		cd /usr/share/postgresql/8.4/contrib/postgis-1.5/
 //		psql -d geonetwork -f postgis.sql -U postgres
 //		psql -d geonetwork -f spatial_ref_sys.sql -U postgres
-//		cd /var/lib/tomcat6/webapps/geonetwork/WEB-INF/classes/setup/sql/
+//		cd /var/lib/tomcat7/webapps/geonetwork/WEB-INF/classes/setup/sql/
 //		psql -d geonetwork -U postgres -f create/create-db-postgis.sql
 //		psql -d geonetwork -U postgres -f data/data-db-default.sql
+//		psql -d geonetwork -U postgres -f data/loc-eng-default.sql
 //
 //	WARNING: Export to GeoNetwork will destroy all data on your GeoNetwork database!
 //
@@ -34,14 +35,13 @@ if ($username!='admin') die();
 include "conf/config.php";
 include "connect.php";
 
-// also connect to geonetwork
-$geonetwork = "host=localhost port=5432 dbname=geonetwork user=postgres password=secret";
-$pg_conn = pg_connect($geonetwork);
-
 // now lets go
 include "header.php";
 include "navigation.php";
 include "main1.php";
+
+// connect to geonetwork if configured
+$pg_conn = pg_connect($geonetwork) or die ("<h3>Problems with connection to GeoNetwork!</h3>\n");
 
 // clear all metadata from geonetwork
 print "<h3>Deleting all metadata from GeoNetwork...</h3>";
