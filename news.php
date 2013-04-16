@@ -121,11 +121,16 @@ if (isset($_REQUEST['update'])) { // just do the aggregation of all newsfeeds, a
 			$sql="update metadata set abstract='".mysql_real_escape_string($subtitle)."' where id=".$id.";";
 			$result2 = mysql_query($sql);
 		}
-		// if there is an author and there was a change in auothor's name
+		// if there is an author and there was a change in auothor's name or email
 		if ($author = $feed->get_author()) {
-			$organisation=html_entity_decode($author->get_name(),ENT_NOQUOTES, 'UTF-8');
-			if ($organisation!=$row['organisation']) {
-				$sql="update metadata set organisation='".mysql_real_escape_string($organisation)."' where id=".$id.";";
+			$individual=html_entity_decode($author->get_name(),ENT_NOQUOTES, 'UTF-8');
+			if ($individual!=$row['individual']) {
+				$sql="update metadata set individual='".mysql_real_escape_string($individual)."' where id=".$id.";";
+				$result2 = mysql_query($sql);
+			}
+			$email=html_entity_decode($author->get_email(),ENT_NOQUOTES, 'UTF-8');
+			if ($email!=$row['email']) {
+				$sql="update metadata set email='".mysql_real_escape_string($email)."' where id=".$id.";";
 				$result2 = mysql_query($sql);
 			}
 		}	
@@ -163,25 +168,32 @@ if (isset($_REQUEST['uuid'])) { // standalone, get & display feed, with enclosur
 	$keywords=explode(",",str_replace(", ",",",$oldkeywords));	// here we add all keywords for this feed
 	foreach ($feed->get_items() as $item):
 		$newstitle=strip_tags($item->get_title());
-		$description=strip_tags($item->get_description(),"<p><br>");
+		if (strpos($linkage,"youtube")===false) {
+			// limit to 160 chars according to german "Leistungsschtzrecht"
+			$description=substr(strip_tags($item->get_description(),"<p><br>"),0,160).'...';
+		} else {
+			// print YOUTUBE content with invalidated links 
+			$description=str_replace("<a href=","<a rel=\"nofollow\" href=",$item->get_description());
+		}
 		$link=strip_tags($item->get_permalink());
 		$pubdate=strip_tags($item->get_date("Y-m-d H:i"));
 		$jumper=substr(md5($link),0,4);						// create jump anchor
 		print '<div class="item">';
 		print '<a name="'.$jumper.'"></a>';
 		print '<h3>'.$newstitle.'</h3>';
-		// print content with invalidated links - you never know what bloggers will post ;-)
-		// print '<p>'.str_replace("<a href=","<a rel=\"nofollow\" href=",$description).'</p>';
-		// limit to 160 chars according to german "Leistungsschtzrecht"
-		print "<p>".substr($description,0,160)."...</p>\n";
-		if ($enclosure = $item->get_enclosure()) {
-			echo $enclosure->native_embed(array(
-				'audio' => 'external/simplepie/demo/for_the_demo/place_audio.png',
-				'video' => 'external/simplepie/demo/for_the_demo/place_audio.png',
-				'mediaplayer' => 'external/simplepie/demo/for_the_demo/mediaplayer.swf'
+		print "<p>".$description."</p>\n";
+		foreach ($item->get_enclosures() as $enclosure) {
+			print "<p>\n";
+			foreach ((array) $enclosure->get_thumbnails() as $thumbnail) {
+				echo "<img src='".$thumbnail."'>\n";
+			}
+			print $enclosure->native_embed(array(
+					'audio' => 'external/simplepie/demo/for_the_demo/place_audio.png',
+					'video' => 'external/simplepie/demo/for_the_demo/place_audio.png',
+					'mediaplayer' => 'external/simplepie/demo/for_the_demo/mediaplayer.swf'
 			));
+			print "<p>\n";
 		}
-		print "<p>\n";
 		print '<a href="details.php?uuid='.$uuid.'" class="ym-button ym-next">Details</a>';
 		print '<a href="'.$link.'" rel="nofollow" class="ym-button ym-play">Article</a>';
 		print "categories: ";

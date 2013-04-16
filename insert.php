@@ -26,6 +26,7 @@ if (strtotime($moddate)>time()) {
 $abstract = trim(mysql_real_escape_string($_POST["abstract"]));
 $purpose = trim(mysql_real_escape_string($_POST["purpose"]));
 $individual = trim(mysql_real_escape_string($_POST["individual"]));
+$email = trim(mysql_real_escape_string($_POST["email"]));
 $category = trim(mysql_real_escape_string($_POST["category"]));
 $organisation = trim(mysql_real_escape_string($_POST["organisation"]));
 $city = trim(mysql_real_escape_string($_POST["city"]));
@@ -46,7 +47,12 @@ $grs = trim(mysql_real_escape_string($_POST["grs"]));
 $linkage=trim($_POST["linkage"]);
 if (($linkage!="") && ($title=="")) {
     print "<h3>Dublin Core Metadata extracted from website</h3>";	
-	$format="Website";
+	// short guess from the url if this seems to be a newsfeed
+	if (strpos($linkage,"/feeds")===false) {
+		$format="Website";
+	} else {
+		$format="Newsfeed";
+	} 
 	// check if we have a website with this UUID already
 	$uuid=md5($linkage);
 	$sql="select uuid, username from metadata where `uuid`='".$uuid."';";
@@ -69,10 +75,12 @@ if (($linkage!="") && ($title=="")) {
 		$nodes = $xpath->query('//title'); // Find all title elements in document
 		foreach ($nodes as $node) $title=mysql_real_escape_string($node->nodeValue); // title text
 		$nodes = $xpath->query('//link[@type="application/rss+xml"]/@href');
-		foreach ($nodes as $node) $newsfeed=mysql_real_escape_string($node->nodeValue); // newsfeed text
-		if ($newsfeed!="") {
-		  $format="Newsfeed";
-		  $linkage=$newsfeed;
+		foreach ($nodes as $node) {
+			if ($newsfeed=="") {			// just take first newsfeed url
+				$newsfeed=mysql_real_escape_string($node->nodeValue); 
+				$format="Newsfeed";
+				$linkage=$newsfeed;
+			}
 		}
 		print "<table>\n";
 		print "<tr><td>title</td><td>$title</td></tr>\n";
@@ -130,11 +138,11 @@ if (($uuid!=="") or ($title!=="")) {
 	// local peer id
 	$peer_id=-1;
 	// now let's go insert data to the database
-	$sql="INSERT INTO metadata (id, uuid, peer_id, title, pubdate, moddate, abstract, purpose, individual, category, format, organisation, city, keywords, denominator, thumbnail, uselimitation, westbc, southbc, eastbc, northbc, area, linkage, grs, username) VALUES ('', '".$uuid."', ".$peer_id.", '".$title."', '".$pubdate."', '".$moddate."', '".$abstract."', '".$purpose."', '".$individual."', '".$category."', '".$format."', '".$organisation."', '".$city."', '".$keywords."', '".$denominator."', '".$thumbnail."', '".$uselimitation."', ".$westbc.", ".$southbc.", ".$eastbc.", ".$northbc.", ".$area.", '".$linkage."', '".$grs."', '".$username."')";
+	$sql="INSERT INTO metadata (id, uuid, peer_id, title, pubdate, moddate, abstract, purpose, individual, email, category, format, organisation, city, keywords, denominator, thumbnail, uselimitation, westbc, southbc, eastbc, northbc, area, linkage, grs, username) VALUES ('', '".$uuid."', ".$peer_id.", '".$title."', '".$pubdate."', '".$moddate."', '".$abstract."', '".$purpose."', '".$individual."', '".$email."', '".$category."', '".$format."', '".$organisation."', '".$city."', '".$keywords."', '".$denominator."', '".$thumbnail."', '".$uselimitation."', ".$westbc.", ".$southbc.", ".$eastbc.", ".$northbc.", ".$area.", '".$linkage."', '".$grs."', '".$username."')";
 
 	$results = mysql_query($sql);
 	if($results) { 
-		print ", please click <a href=\"details.php?uuid=$uuid\">here</a> to see new record.</p>";
+		print "<p><a href=\"details.php?uuid=".$uuid."\" class=\"ym-button ym-next\">View metadata record</a></p>";
 	} else { 
 		die('Invalid query: '.mysql_error()); 
 	}

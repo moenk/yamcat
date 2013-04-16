@@ -1,9 +1,11 @@
 <?php
 //
-//  parser.php 
+//  file: 		parser.php 
 //
-//	called with loaded $xml object for parsing required information for our attributes
-//	deletes old metadata record and create a new with those attributes
+//	coder: 		moenk
+//
+//	purpose: 	called with loaded $xml object for parsing required information for our attributes
+//				deletes old metadata record and create a new with those attributes
 //
 //
 
@@ -11,18 +13,30 @@ require_once "area.php";
 require_once "xpath.php";
 include "connect.php";
 
+// get the creation date of dataset
 $creadate=""; // simplest ESRI-XML-style
-$creadate=$xml->Esri->CreaDate;
+$creadate=(string)$xml->Esri->CreaDate;
 $creatime=""; // used later for faking UUID
-$creatime=$xml->Esri->CreaTime;
-$pubdate=$creadate; // easy, old ArcGIS - otherwiese lets go
+$creatime=(string)$xml->Esri->CreaTime;
+// easy, old ArcGIS - otherwiese lets go
+$pubdate=substr($creadate,0,4)."-".substr($creadate,4,2)."-".substr($creadate,6,2).
+			substr($creatime,0,2).":".substr($creatime,2,2); 
 if ($pubdate=="") $pubdate=(string)$xml->gmd_identificationInfo->gmd_MD_DataIdentification->gmd_citation->gmd_CI_Citation->gmd_date->gmd_CI_Date->gmd_date->gco_DateTime; // iso 19139
 if ($pubdate=="") $pubdate=(string)$xml->idinfo->citation->citeinfo->pubdate; //ArcGIS-style
 if ($pubdate=="") $pubdate=(string)$xml->gmd_dateStamp->gco_DateTime;
 if ($pubdate=="") $pubdate=(string)$xml->gmd_dateStamp->gco_Date;
 if ($pubdate=="") $pubdate=(string)$xml->dc_date; // DC
+// format date, also against sql injection
+$pubdate=date("Y-m-d H:i",strtotime($pubdate));
 
-$pubdate=date("Y-m-d",strtotime($pubdate));
+// get the modification date of dataset
+$syncdate=(string)$xml->Esri->ModDate;
+$synctime=(string)$xml->Esri->ModTime;
+$moddate=substr($syncdate,0,4)."-".substr($syncdate,4,2)."-".substr($syncdate,6,2)." ".
+			substr($synctime,0,2).":".substr($synctime,2,2); 
+// format date, also against sql injection
+$moddate=date("Y-m-d H:i",strtotime($moddate));
+if ($moddate<$pubdate) $moddate=$pubdate;
 
 // get the metadata id
 $metaid="";
@@ -328,7 +342,7 @@ if (($metaid!="") && ($area>0)){ // only insert metadata with co-ordinates and m
 	$sql = "delete FROM `metadata` WHERE `uuid`='".$metaid."'";
 	$results = mysql_query($sql);
 	$username=mysql_real_escape_string($_SESSION['username']);
-	$sql="INSERT INTO metadata (id, uuid, peer_id, title, pubdate, abstract, purpose, individual, category, format, organisation, city, keywords, denominator, thumbnail, uselimitation, westbc, southbc, eastbc, northbc, area, linkage, source, wms, grs, username) VALUES ('', '".$metaid."',".$peer.", '".$title."', '".$pubdate."', '".$abstract."', '".$purpose."', '".$individual."', '".$category."', '".$format."', '".$origin."', '".$city."', '".$keywords."', '".$denominator."', '".$thumbnail."', '".$useconst."', ".$westbc.", ".$southbc.", ".$eastbc.", ".$northbc.", ".$area.", '".$linkage."', '".$dateiname."', '".$wms."', '".$grs."', '".$username."')";
+	$sql="INSERT INTO metadata (id, uuid, peer_id, title, pubdate, moddate, abstract, purpose, individual, category, format, organisation, city, keywords, denominator, thumbnail, uselimitation, westbc, southbc, eastbc, northbc, area, linkage, source, wms, grs, username) VALUES ('', '".$metaid."',".$peer.", '".$title."', '".$pubdate."', '".$moddate."', '".$abstract."', '".$purpose."', '".$individual."', '".$category."', '".$format."', '".$origin."', '".$city."', '".$keywords."', '".$denominator."', '".$thumbnail."', '".$useconst."', ".$westbc.", ".$southbc.", ".$eastbc.", ".$northbc.", ".$area.", '".$linkage."', '".$dateiname."', '".$wms."', '".$grs."', '".$username."')";
 	$results = mysql_query($sql);  
 	print "<tr>";
 } else print "<tr bgcolor=yellow>"; // if not added.

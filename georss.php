@@ -35,14 +35,14 @@ print '<?xml version="1.0"?>
      <pubDate>'.date("r").'</pubDate>
 ';
 
-$sql_news = 'SELECT m.uuid, n.title, n.description, n.link, n.pubdate, m.organisation AS author, m.format, 
+$sql_news = 'SELECT m.uuid, n.title, n.description, n.link, n.pubdate, m.email AS author, m.format, 
 (m.eastbc + m.westbc) /2 AS lon, (m.southbc + m.northbc) /2 AS lat
 FROM metadata AS m
 INNER JOIN news AS n ON ( m.id = n.metadata_id )
 ORDER BY n.pubdate DESC
 LIMIT '.$count;
 
-$sql_meta='SELECT l.uuid, l.title, l.abstract AS description, l.linkage AS link, l.pubdate, l.organisation AS author, l.format, 
+$sql_meta='SELECT l.uuid, l.title, l.abstract AS description, l.linkage AS link, l.pubdate, l.email AS author, l.format, 
 (l.eastbc + l.westbc) /2 AS lon, (l.southbc + l.northbc) /2 AS lat
 FROM metadata AS l
 WHERE l.format != "Newsfeed"

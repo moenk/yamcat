@@ -61,11 +61,8 @@ Enter GetCapabilities URL
 
 	// get the simple things first
 	$title=mysql_real_escape_string($xml->Service->Title);
-	$person=(string)$xml->Service->ContactInformation->ContactPersonPrimary->ContactPerson;
-	$individual=$person;
-	$email=(string)$xml->Service->ContactInformation->ContactElectronicMailAddress;
-	if ($email!="") $individual.=", ".$email;
-	$individual=mysql_real_escape_string($individual);
+	$individual=mysql_real_escape_string($xml->Service->ContactInformation->ContactPersonPrimary->ContactPerson);
+	$email=mysql_real_escape_string($xml->Service->ContactInformation->ContactElectronicMailAddress);
 	$organisation=mysql_real_escape_string($xml->Service->ContactInformation->ContactPersonPrimary->ContactOrganization);
 	$city=mysql_real_escape_string($xml->Service->ContactInformation->ContactAddress->City);
 	$uselimitation=mysql_real_escape_string($xml->Service->AccessConstraints);
@@ -127,7 +124,7 @@ Enter GetCapabilities URL
 		}
 
 		// now let's go insert data to the database
-		$sql="INSERT INTO metadata (uuid, peer_id, title, pubdate, abstract, purpose, individual, category, format, organisation, city, keywords, denominator, thumbnail, uselimitation, westbc, southbc, eastbc, northbc, area, linkage, grs, wms, username) VALUES ('".$uuid."', ".$peer_id.", '".$title."', now(), '".$abstract."', '".$purpose."', '".$individual."', '".$category."', '".$format."', '".$organisation."', '".$city."', '".$keywords."', '".$denominator."', '".$thumbnail."', '".$uselimitation."', ".$westbc.", ".$southbc.", ".$eastbc.", ".$northbc.", ".$area.", '".$linkage."', '".$grs."', '".$wms."', '".$username."')";
+		$sql="INSERT INTO metadata (uuid, peer_id, title, pubdate, abstract, purpose, individual, email, category, format, organisation, city, keywords, denominator, thumbnail, uselimitation, westbc, southbc, eastbc, northbc, area, linkage, grs, wms, username) VALUES ('".$uuid."', ".$peer_id.", '".$title."', now(), '".$abstract."', '".$purpose."', '".$individual."', '".$email."', '".$category."', '".$format."', '".$organisation."', '".$city."', '".$keywords."', '".$denominator."', '".$thumbnail."', '".$uselimitation."', ".$westbc.", ".$southbc.", ".$eastbc.", ".$northbc.", ".$area.", '".$linkage."', '".$grs."', '".$wms."', '".$username."')";
 		// print "<b>".$sql."</b>";
 		
 		$results = mysql_query($sql);

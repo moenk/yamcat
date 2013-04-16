@@ -91,7 +91,9 @@ print "<table>\n";
 $organisation = stripslashes($row["organisation"]);
 print "<tr><td width=\"38%\">Organisation</td><td><b>".htmlspecialchars($organisation)."</b></td></tr>";
 $individual = stripslashes($row["individual"]);
-print "<tr><td>Individual</td><td>".make_clickable($individual)."</td></tr>";
+print "<tr><td>Individual</td><td>".$individual."</td></tr>";
+$email = stripslashes($row["email"]);
+print "<tr><td>E-Mail</td><td>".make_clickable($email)."</td></tr>";
 $city = stripslashes($row["city"]);
 print "<tr><td>City</td><td>".htmlspecialchars($city)."</td></tr>";
 $uselimitation = stripslashes($row["uselimitation"]);
@@ -203,12 +205,14 @@ if (substr($grs,0,5)=="EPSG:") {
 }
 print "<tr><td width=\"38%\">GRS</td><td>".$grs."</td></tr>\n";
 
-print "<tr><td>Linkage</td><td>";
-$linkages=explode(" ",$row["linkage"]);
-foreach ($linkages as $linkage) {
-  print make_clickable($linkage)."<br>";
+if ($username!="") {
+	print "<tr><td>Linkage</td><td>";
+	$linkages=explode(" ",$row["linkage"]);
+	foreach ($linkages as $linkage) {
+		print make_clickable($linkage)."<br>";
+	}
+	print "</td></tr>\n";
 }
-print "</td></tr>\n";
 
 $source = trim(stripslashes($row["source"]));
 // print "<tr><td>Metadata</td><td><a href=\"".$domainroot.$source."\">".basename($source)."</a></td></tr>\n";

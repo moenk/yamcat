@@ -83,6 +83,11 @@ Source
 </div>
 
 <div class="ym-fbox-text">
+<label for="email">E-Mail<?php popuphelp("email"); ?></label>
+<input name="email" maxlength="" type="text" value="<?php echo stripslashes($email) ?>">
+</div>
+
+<div class="ym-fbox-text">
 <label for="city">City<?php popuphelp("city"); ?></label>
 <input name="city" maxlength="" type="text" value="<?php echo stripslashes($city) ?>">
 </div>

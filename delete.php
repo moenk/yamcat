@@ -16,12 +16,14 @@ include "navigation.php";
 include "main1.php";
 
 if (($username==$owner) or ($username=="admin")) {
-  mysql_query("DELETE FROM metadata WHERE id = ".$id." ");
-  print "Metadata deleted from database.";
-  mysql_query("DELETE FROM news WHERE metadata_id = ".$id." ");
-  print "News deleted from database.";
+	print "<ul>\n";
+	mysql_query("DELETE FROM metadata WHERE id = ".$id." ");
+	print "<li>Metadata deleted from database.</li>";
+	mysql_query("DELETE FROM news WHERE metadata_id = ".$id." ");
+	print "<li>News deleted from database.</li>";
+  	print "</ul>\n";
 } else {
-  print "You (".$username.") are not the owner (".$owner.") of this record.";
+	print "You (".$username.") are not the owner (".$owner.") of this record.";
 }
 mysql_close();
 

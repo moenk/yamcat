@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS `metadata` (
   `abstract` text NOT NULL,
   `purpose` text NOT NULL,
   `individual` varchar(255) NOT NULL DEFAULT '',
+  `email` varchar(255) NOT NULL DEFAULT '',
   `category` varchar(50) NOT NULL,
   `format` varchar(50) NOT NULL,
   `organisation` varchar(255) NOT NULL DEFAULT '',
