@@ -136,7 +136,8 @@ if ($username!="") {
 	if ($format=="newsfeed") {
 		print "<a class=\"ym-button ym-play\" href=\"news.php?uuid=".$uuid."\">News</a>\n";
 	}
-	if ((($username==$owner) or ($username=="admin")) and ($dataset=="")) {
+	// Edit buttion if owner or admin, and: it is not automatic created by sync
+	if ((($username==$owner) or ($username=="admin")) and (($dataset=="") or ($format="Download"))) {
 		print "<a rel=\"nofollow\" href=\"edit.php?id=".$id."\" class=\"ym-button ym-edit\">Edit</a>";
 		print "<a rel=\"nofollow\" href=\"delete.php?id=".$id."\" class=\"ym-button ym-delete\">Delete</a>";
 		if ($format=="service") print "<a rel=\"nofollow\" href=\"add_service.php?url=".rawurlencode($wms)."\" class=\"ym-button ym-star\">Refresh</a>";

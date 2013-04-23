@@ -15,6 +15,18 @@ include "conf/config.php";
 require_once "dbauth.php";
 $username=$_SESSION['username'];
 
+// header stuff
+$subtitle=$title;
+$title="My geodata files";
+include("header.php");
+include("navigation.php");
+include("main1.php");
+
+print '<div class="ym-grid linearize-level-1">
+<article class="ym-g50 ym-gl">
+<div class="ym-gbox-left">
+';
+
 // files to delete?
 $delete="";
 if(isset($_REQUEST['delete'])) {
@@ -30,23 +42,39 @@ if(isset($_REQUEST['dataset'])) {
 // create user's home directory, stripped all but a-z, 0-9, and lower case, add dataset name if available
 $repository=strtolower(ereg_replace("[^A-Za-z0-9]","_",$username));
 $dirname=$geodatapath.$repository;
-if ($dataset!="") $dirname.="/".$dataset;
-if(!file_exists($dirname)) { 
-  mkdir($dirname); 
+if ($dataset!="") {
+	$dirname.="/".$dataset;
+	// create dataset directory if required, also create new metadata record
+	if(!file_exists($dirname)) { 
+		include "connect.php";
+		mkdir($dirname); 
+		// set values for new metadata record
+		$peer_id=-1;
+		$title=str_replace("_"," ",$repository."_".$dataset);
+		$pubdate=date("Y-m-d H:i");
+		$moddate=$pubdate;
+		$uuid=md5($title);
+		$format="Download";
+		$linkage=$domainroot."download.php?repository=".$repository."&dataset=".$dataset;
+		// now let's go insert data to the database
+		$sql="INSERT INTO metadata (id, uuid, peer_id, title, pubdate, moddate, format, linkage, dataset, username) VALUES ('', '".$uuid."', ".$peer_id.", '".$title."', '".$pubdate."', '".$moddate."', '".$format."', '".$linkage."', '".$dataset."', '".$username."')";
+		$results = mysql_query($sql);
+		print "<h3>Dataset creation</h3>\n";
+		if($results) { 
+			print "<ul><li>Dataset created</li><li>Metadata created</li></ul>\n";
+			print "<p><a href=\"details.php?uuid=".$uuid."\" class=\"ym-button ym-next\">View metadata record</a></p>";
+		} else { 
+			die('Invalid query: '.mysql_error()); 
+		}
+	}
+} else {
+	// create users home directory
+	if(!file_exists($dirname)) { 
+		mkdir($dirname); 
+	}
 } 
 
-// header stuff
-$subtitle=$title;
-$title="My geodata files";
-include("header.php");
-include("navigation.php");
-include("main1.php");
-?>
-<div class="ym-grid linearize-level-1">
-<article class="ym-g50 ym-gl">
-<div class="ym-gbox-left">
-			
-<?php if ($dataset=="") { ?>
+if ($dataset=="") { ?>
 
 <h3>
 Create dataset
@@ -73,7 +101,7 @@ Here you can upload you geodata. Either upload single files or a ZIP archive tha
 <?php
 // if a file was uploaded move it to the home directory
 if ($_FILES["file"]["tmp_name"]!="") {
-	$target=strtolower($dirname."/".$_FILES["file"]["name"]);
+	$target=strtolower($dirname."/".str_replace(" ","_",$_FILES["file"]["name"]));
 	move_uploaded_file($_FILES["file"]["tmp_name"],$target);
 	print "File stored as: " . $target;
 	// unzip file if zip file was uploaded
@@ -137,6 +165,7 @@ if ($dataset!="") print " (".$dataset.")";
 </h3>
 
 <?php
+// recursive deletion of directory with files and subs
 function rrmdir($dir) {
     foreach(glob($dir . '/*') as $file) {
         if(is_dir($file)) {
@@ -148,14 +177,24 @@ function rrmdir($dir) {
     rmdir($dir);
 }
 
+// go over all files and dirs and decide what to do
 if ($handle = opendir($dirname)) {
     print "<table>";
     while (false !== ($file = readdir($handle))) {
 		if (substr($file,0,1)!=".") {
 			if (($delete!="") && ($delete==md5($file))) {
 				if(is_dir($dirname."/".$file)) {
+					// recursive delete files
 					rrmdir($dirname."/".$file);
+					// delete corresponding metadata record
+					include "connect.php";
+					$sql="delete from metadata where username='".$username."' and dataset='".$file."';";
+					$results = mysql_query($sql);
+					if(!$results) { 
+						die('Invalid query: '.mysql_error()); 
+					}
 				} else {
+					// just delete that file
 					unlink($dirname."/".$file);
 				}
 			} else {

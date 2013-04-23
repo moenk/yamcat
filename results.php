@@ -131,14 +131,17 @@ while ($row = mysql_fetch_assoc($result)) {
 	$bbox="[".$westbc.",".$southbc.",".$eastbc.",".$northbc."]";
 	$owner = stripslashes($row["username"]);
 	$dataset = stripslashes($row["dataset"]);
-	$format = "...".strtolower($row["format"]);
-	$linkage = "...".strtolower($row["linkage"]);
+	$format = strtolower($row["format"]);
+	$linkage = strtolower($row["linkage"]);
 	print "<td>"; 
-	if ((strpos($format,'website')) or (strpos($format,'information'))) print "<img src=\"img/website.png\" alt=\"Website\" title=\"Website\" />";
-	if ((strpos($format,'service')) or (strpos($linkage,'getcapa'))) {
+	if ((strpos(".".$format,'website')) or (strpos(".".$format,'information'))) print "<img src=\"img/website.png\" alt=\"Website\" title=\"Website\" />";
+	if ((strpos(".".$format,'service')) or (strpos(".".$linkage,'getcapa'))) {
 		print "<a rel=\"nofollow\" href=\"wms.php?url=".urlencode($wms)."&bbox=".$bbox."&grs=".$grs."\"><img border=\"0\" src=\"img/wms.png\" alt=\"WMS\" title=\"WMS\" /></a>";
 	}
-	if (strpos($format,'newsfeed')) print "<a href=\"news.php?uuid=".$uuid."\"><img border=\"0\" src=\"img/newsfeed.png\" alt=\"Newsfeed\" title=\"Newsfeed\" /></a>";
+	if (strpos(".".$format,'newsfeed')) print "<a href=\"news.php?uuid=".$uuid."\"><img border=\"0\" src=\"img/newsfeed.png\" alt=\"Newsfeed\" title=\"Newsfeed\" /></a>";
+	// metadata of format Download contain direct link in the linkage!
+	if (strpos(".".$format,'download')) print "<a rel=\"nofollow\" href=\"".$linkage."\"><img src=\"img/download.png\" border=\"0\" alt=\"Download\" title=\"Download\" />";
+	// if dataset is set create a to zip dataset for download
 	if ($dataset!="") print "<a rel=\"nofollow\" href=\"download.php?repository=".$owner."&dataset=".$dataset."\"><img src=\"img/download.png\" border=\"0\" alt=\"Download\" title=\"Download\" />";
 	print "</td>";
 	print "<td><a href=\"results.php?username=".$owner."\">".$owner."</a></td>";
