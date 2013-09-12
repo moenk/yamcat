@@ -50,26 +50,32 @@ if (!$pg_result) {
 	print "Problems with connection to GeoNetwork!\n";
 	exit;
 }
+$pg_result = pg_query($pg_conn, "truncate categories cascade;");
 $pg_result = pg_query($pg_conn, "truncate operationallowed;");
 $pg_result = pg_query($pg_conn, "truncate spatialindex;");
 print "Done!";
 
-// start export loop
+// start export loop for metadata records
 print "<h3>Exporting metadata records to GeoNetwork...</h3>";
 
 print "<table>\n";
-$my_sql="select m.id, m.uuid, m.title, m.pubdate, m.moddate, m.category, 
+$my_sql="select m.id, m.username, 
+m.uuid, m.title, m.pubdate, m.moddate, m.category, 
 m.abstract, m.purpose, m.keywords, m.denominator, m.thumbnail, 
-m.northbc, m.southbc, m.eastbc, m.westbc,
-m.organisation, 
-m.wms, m.grs, 
-m.username, u.organisation as metaorga 
-from metadata as m inner join users as u on (m.username=u.username);";
+m.individual, m.organisation, m.email, m.city, 
+m.northbc, m.southbc, m.eastbc, m.westbc, 
+m.wms, m.grs, m.format, m.linkage, 
+u.surname as meta_surname, u.name as meta_name, u.organisation as meta_organisation, u.address as meta_address, 
+u.email as meta_email, u.zip as meta_zip, u.city as meta_city, u.state as meta_state, u.country as meta_country, 
+u.profile as meta_profile 
+from metadata as m inner join users as u on (m.username=u.username) 
+order by m.id desc;";
 $result = mysql_query($my_sql);
 while ($row = mysql_fetch_assoc($result)) {
 	include "iso19139.php";
 	$data=pg_escape_string($xml);
-	print "<tr><td>".$row['id']."</td><td>".$row['title']."</td><td>".$row['uuid']."</td><td>".$row['username']."</td>";
+	print "<tr><td>".$row['id']."</td><td>".$row['title']."</td>";
+	print "<td><a href=\"details.php?uuid=".$row['uuid']."\" \"target=\"blank\">".$row['uuid']."</a></td><td>".$row['username']."</td>";
 	$id=pg_escape_string($row['id']);
 	$uuid=pg_escape_string($row['uuid']);
 	$createdate=pg_escape_string($row['pubdate']);
@@ -104,8 +110,44 @@ $pg_result = pg_query($pg_conn, "insert into operationallowed (select '1' as gro
 if (!$pg_result) {
 	print "Setting permissions in GeoNetwork failed!\n";	
 	exit;
+} else {
+	print "Done!";
 }
-print "Done!";
+
+// start export loop for categories
+print "<h3>Exporting category records to GeoNetwork...</h3>";
+print "<table>\n";
+$my_sql="select c.id, c.catname, count(m.id) as anzahl from categories as c left join metadata as m on (c.catname=m.category) group by catname order by c.id asc;";
+$result = mysql_query($my_sql);
+while ($row = mysql_fetch_assoc($result)) {
+	print "<tr><td>".$row['id']."</td><td>".$row['catname']."</td><td>".$row['anzahl']."</td>";
+	$id=pg_escape_string($row['id']);
+	$catname=pg_escape_string($row['catname']);
+	$pg_sql="insert into categories (\"id\",\"name\") values ('$id','$catname');";
+	$pg_result = pg_query($pg_conn,$pg_sql);
+	if (!$pg_result) {
+		print "Categories export in GeoNetwork failed!\n";
+		exit;
+	}
+	$pg_sql="insert into categoriesdes (\"iddes\",\"langid\",\"label\") values ('$id','eng','$catname');";
+	$pg_result = pg_query($pg_conn,$pg_sql);
+	print "<td>".pg_last_error($pg_conn)."</td></tr>\n";
+}
+// insert category into metadatacateg, needs to find catid from category-string
+$my_sql="select m.id as metadataid, c.id as categoryid from metadata as m inner join categories as c on (m.category=c.catname);";
+$result = mysql_query($my_sql);
+while ($row = mysql_fetch_assoc($result)) {
+	$metadataid=pg_escape_string($row['metadataid']);
+	$categoryid=pg_escape_string($row['categoryid']);
+	$pg_sql="insert into metadatacateg (\"metadataid\",\"categoryid\") values ('$metadataid','$categoryid');";
+	$pg_result = pg_query($pg_conn,$pg_sql);
+	if (!$pg_result) {
+		print "Metadata categories export in GeoNetwork failed: ".pg_last_error($pg_conn)."\n";
+		exit;
+	}
+}
+
+print "</table>\n";
 
 include "main2.php";
 include "footer.php";

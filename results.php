@@ -8,6 +8,7 @@
 //
 
 session_start(); // auch hier kein dbauth!
+$username=trim($_SESSION['username']);
 include "conf/config.php";
 
 $subtitle=$title;
@@ -97,7 +98,15 @@ if (!$result) {
 }
 */
 if (mysql_num_rows($result) == 0) {
-    echo "No metadata records found.";
+    echo "No metadata records found.\n";
+}
+
+// if user requests list of his own record give buttons to add records
+if ($usernameterm==$username) {
+	print "<a class=\"ym-button ym-add\" href=\"add.php\">Add metadata record</a>\n";
+	print "<a class=\"ym-button ym-add\" href=\"add_link.php\">Add website</a>\n";
+	print "<a class=\"ym-button ym-add\"  href=\"add_service.php\">Add service</a>\n";
+	print "<a class=\"ym-button ym-add\" href=\"import.php\">Import CSV metadata</a>\n";
 }
 
 $z=0;
@@ -134,15 +143,18 @@ while ($row = mysql_fetch_assoc($result)) {
 	$format = strtolower($row["format"]);
 	$linkage = strtolower($row["linkage"]);
 	print "<td>"; 
-	if ((strpos(".".$format,'website')) or (strpos(".".$format,'information'))) print "<img src=\"img/website.png\" alt=\"Website\" title=\"Website\" />";
-	if ((strpos(".".$format,'service')) or (strpos(".".$linkage,'getcapa'))) {
-		print "<a rel=\"nofollow\" href=\"wms.php?url=".urlencode($wms)."&bbox=".$bbox."&grs=".$grs."\"><img border=\"0\" src=\"img/wms.png\" alt=\"WMS\" title=\"WMS\" /></a>";
+	if ($format=='website') {
+		print "<img src=\"img/website.png\" alt=\"Website\" title=\"Website\" />";
 	}
-	if (strpos(".".$format,'newsfeed')) print "<a href=\"news.php?uuid=".$uuid."\"><img border=\"0\" src=\"img/newsfeed.png\" alt=\"Newsfeed\" title=\"Newsfeed\" /></a>";
-	// metadata of format Download contain direct link in the linkage!
-	if (strpos(".".$format,'download')) print "<a rel=\"nofollow\" href=\"".$linkage."\"><img src=\"img/download.png\" border=\"0\" alt=\"Download\" title=\"Download\" />";
-	// if dataset is set create a to zip dataset for download
-	if ($dataset!="") print "<a rel=\"nofollow\" href=\"download.php?repository=".$owner."&dataset=".$dataset."\"><img src=\"img/download.png\" border=\"0\" alt=\"Download\" title=\"Download\" />";
+	if ($format=='service') {
+		print "<a rel=\"nofollow\" href=\"wms.php?url=".urlencode($linkage)."&bbox=".$bbox."&grs=".$grs."\"><img border=\"0\" src=\"img/wms.png\" alt=\"WMS\" title=\"WMS\" /></a>";
+	}
+	if ($format=='newsfeed') {
+		print "<a href=\"news.php?uuid=".$uuid."\"><img border=\"0\" src=\"img/newsfeed.png\" alt=\"Newsfeed\" title=\"Newsfeed\" /></a>";
+	}
+	if ($format=='download') {
+		print "<a rel=\"nofollow\" href=\"".$linkage."\"><img src=\"img/download.png\" border=\"0\" alt=\"Download\" title=\"Download\" />";
+	}
 	print "</td>";
 	print "<td><a href=\"results.php?username=".$owner."\">".$owner."</a></td>";
 	$pubdate = stripslashes($row["pubdate"]);

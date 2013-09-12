@@ -4,18 +4,16 @@
 			<ul>
 
 <?php
-print "<li><a href=\"".$domainroot."\">Start</a></li>\n";
+print "<li><a href=\"index.php\">Start</a></li>\n";
 print "<li><a href=\"search.php\">Search</a></li>\n";
 print "<li><a href=\"new_links.php\">New entries</a></li>\n";
 print "<li><a href=\"news.php\">Newsfeeds</a></li>\n";
 if (isset($_SESSION['logged_in'])) {
 	print "<li><a href=\"files.php\">My geodata</a></li>\n";
 	print "<li><a href=\"results.php?username=".$username."\">My metadata</a></li>\n";
-	print "<li><a href=\"add_link.php\">Add website</a></li>\n";
-	print "<li><a href=\"add_service.php\">Add service</a></li>\n";
-	print "<li><a href=\"add.php\">Add metadata</a></li>\n";
 	if ($_SESSION['username']=="admin") {
 		print "<li><a href=\"users.php\">Users</a></li>\n";
+		print "<li><a href=\"export.php\">Export</a></li>\n";
 		print "<li><a href=\"newsletter.php\">Newsletter</a></li>\n";
 	}	
 	print "<li><a href=\"profile.php\">User profile</a></li>\n";

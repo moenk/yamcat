@@ -47,7 +47,8 @@ Enter GetCapabilities URL
 	include "connect.php";
 	// uuid and linkage for the original url
 	$uuid=md5($url);
-	$linkage=mysql_real_escape_string("OGC:WMS-1.1.1-http-get-capabilities ".$url);
+	// $linkage=mysql_real_escape_string("OGC:WMS-1.1.1-http-get-capabilities ".$url);
+	$linkage=mysql_real_escape_string($url);
 	$wms=mysql_real_escape_string($url);
 	// missing parameters?
     if (strpos($url,'?')==false) $url.="?";
@@ -67,6 +68,8 @@ Enter GetCapabilities URL
 	$city=mysql_real_escape_string($xml->Service->ContactInformation->ContactAddress->City);
 	$uselimitation=mysql_real_escape_string($xml->Service->AccessConstraints);
 	$thumbnail=mysql_real_escape_string($xml->Capability->Layer->Style->LegendURL->OnlineResource[xlink_href]);
+	
+	// some hacks
 	$category="imageryBaseMapsEarthCover";
 	$format="Service";
 
@@ -77,23 +80,23 @@ Enter GetCapabilities URL
 	// now up to the bbox
 	$westbc=0;
 	if ($westbc==0) $westbc=floatval($xml->Capability->Layer->LatLonBoundingBox[minx]);
-	if ($westbc==0) $westbc=floatval($xml->Capability->Layer->Layer->LatLonBoundingBox[minx]);
+	if ($westbc==0) $westbc=floatval($xml->Capability->Layer->Layer->LatLonBoundingBox['minx']);
 	if ($westbc==0) $westbc=floatval($xml->Capability->Layer->EX_GeographicBoundingBox->westBoundLongitude);
 	$eastbc=0;
 	if ($eastbc==0) $eastbc=floatval($xml->Capability->Layer->LatLonBoundingBox[maxx]);
-	if ($eastbc==0) $eastbc=floatval($xml->Capability->Layer->Layer->LatLonBoundingBox[maxx]);
+	if ($eastbc==0) $eastbc=floatval($xml->Capability->Layer->Layer->LatLonBoundingBox['maxx']);
 	if ($eastbc==0) $eastbc=floatval($xml->Capability->Layer->EX_GeographicBoundingBox->eastBoundLongitude);
 	$southbc=0;
 	if ($southbc==0) $southbc=floatval($xml->Capability->Layer->LatLonBoundingBox[miny]);
-	if ($southbc==0) $southbc=floatval($xml->Capability->Layer->Layer->LatLonBoundingBox[miny]);
+	if ($southbc==0) $southbc=floatval($xml->Capability->Layer->Layer->LatLonBoundingBox['miny']);
 	if ($southbc==0) $southbc=floatval($xml->Capability->Layer->EX_GeographicBoundingBox->southBoundLatitude);
 	$northbc=0;
 	if ($northbc==0) $northbc=floatval($xml->Capability->Layer->LatLonBoundingBox[maxy]);
-	if ($northbc==0) $northbc=floatval($xml->Capability->Layer->Layer->LatLonBoundingBox[maxy]);
+	if ($northbc==0) $northbc=floatval($xml->Capability->Layer->Layer->LatLonBoundingBox['maxy']);
 	if ($northbc==0) $northbc=floatval($xml->Capability->Layer->EX_GeographicBoundingBox->northBoundLatitude);
 	$area=bbox2area($northbc,$westbc,$southbc,$eastbc);
 
-	// read getcapa and start with this keyword:
+	// read getcapabilities and start with this keyword:
 	$keywords="GetCapabilities";
 	$keywordlist=$xml->xpath('//Keyword');
 	$keywordlist=array_unique($keywordlist);
@@ -111,6 +114,14 @@ Enter GetCapabilities URL
 	}
 	$abstract=mysql_real_escape_string($abstract);
 
+	// pick first denominator we can get
+	$denominator=0;
+	$denominatorlist=$xml->xpath('//Layer/MaxScaleDenominator');
+// print_r($denominatorlist);
+	foreach ($denominatorlist as $denominators) { 
+		if ($denominator==0) $denominator=intval($denominators);
+	}
+		
 	// lets add this to the database if valid
 	if (($uuid!="") && ($title!="")) {
 		print "<p>Metdata-ID: ".$uuid;
@@ -129,7 +140,8 @@ Enter GetCapabilities URL
 		
 		$results = mysql_query($sql);
 		if($results) { 
-			print ", please click <a href=\"details.php?uuid=$uuid\">here</a> to see new record.</p>";
+			print ".</p>";
+			print "<p><a class=\"ym-button ym-next\" href=\"details.php?uuid=".$uuid."\">View metadata record</a></p>";
 		} else { 
 			die('Invalid query: '.mysql_error()); 
 		}

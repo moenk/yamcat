@@ -63,7 +63,7 @@ while ($row = mysql_fetch_assoc($result)) {
 	}
 	$title=$row["title"];
 	$author=$row["author"];
-	if ($author!="") $title = $author.": ".$title;
+	// if ($author!="") $title = $author.": ".$title;
 	print '     <item>
 		<guid isPermaLink="false">'.md5($row["link"]).'</guid>
 		<pubDate>'.date("r",strtotime($row["pubdate"])).'</pubDate>

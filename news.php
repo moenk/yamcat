@@ -121,6 +121,12 @@ if (isset($_REQUEST['update'])) { // just do the aggregation of all newsfeeds, a
 			$sql="update metadata set abstract='".mysql_real_escape_string($subtitle)."' where id=".$id.";";
 			$result2 = mysql_query($sql);
 		}
+		// changes in copyright?
+		$copyright=html_entity_decode($feed->get_copyright(),ENT_NOQUOTES, 'UTF-8');
+		if ($copyright!=$row['uselimitation']) {
+			$sql="update metadata set uselimitation='".mysql_real_escape_string($copyright)."' where id=".$id.";";
+			$result2 = mysql_query($sql);
+		}
 		// if there is an author and there was a change in auothor's name or email
 		if ($author = $feed->get_author()) {
 			$individual=html_entity_decode($author->get_name(),ENT_NOQUOTES, 'UTF-8');

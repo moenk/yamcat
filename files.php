@@ -53,7 +53,8 @@ if ($dataset!="") {
 		$title=str_replace("_"," ",$repository."_".$dataset);
 		$pubdate=date("Y-m-d H:i");
 		$moddate=$pubdate;
-		$uuid=md5($title);
+		include ("uuid.php");
+		$uuid=create_guid(); // was md5($itle)
 		$format="Download";
 		$linkage=$domainroot."download.php?repository=".$repository."&dataset=".$dataset;
 		// now let's go insert data to the database
@@ -77,7 +78,7 @@ if ($dataset!="") {
 if ($dataset=="") { ?>
 
 <h3>
-Create dataset
+Create new dataset
 </h3>
 <p>
 A dataset contains all files with geodata belonging together. It will be created as a subdirectory in your repository.
@@ -93,7 +94,7 @@ A dataset contains all files with geodata belonging together. It will be created
 <?php } else { ?>
 
 <h3>
-Upload files
+Upload files to dataset
 </h3>
 <p>
 Here you can upload you geodata. Either upload single files or a ZIP archive that will be uncompressed on the server.
@@ -143,13 +144,22 @@ if ($_FILES["file"]["tmp_name"]!="") {
 
 <?php } // end if $dataset ?>
 
+<!--
 <h3>
 Sync metadata with geodata
 </h3>
 <p>
 If you uploaded geodata that contain meta information as XML metadata you can use this feature to sync metadata in the database with your geodata.
-<a href="sync.php" class="a ym-button ym-next">XML sync</a>
+<br /><a href="sync.php" class="a ym-button ym-next">XML sync</a>
 </p>
+<h3>
+Import metadata from CSV file
+</h3>
+<p>
+If you have a CSV file with metadata linking to external download sites you can upload this file here for import.
+<br /><a href="import.php" class="a ym-button ym-next">CSV import</a>
+</p>
+-->
 
 </div>
 </article>
@@ -158,9 +168,12 @@ If you uploaded geodata that contain meta information as XML metadata you can us
 <div class="ym-gbox">
 
 <h3>
-List of my geodata files 
 <?php 
-if ($dataset!="") print " (".$dataset.")";
+if ($dataset!="") {
+	print "Files in dataset: ".$dataset;
+} else {
+	print "My geo datasets";
+}
 ?>
 </h3>
 
@@ -200,12 +213,21 @@ if ($handle = opendir($dirname)) {
 			} else {
 				print "<tr><td><b>".$file."</b></td>";
 				if(is_dir($dirname."/".$file)) {
-					print "<td><a rel=\"nofollow\" href=\"files.php?dataset=".$file."\" class=\"ym-button ym-next\">Select</a>";
-					print "<a rel=\"nofollow\" href=\"files.php?delete=".md5($file)."\" class=\"ym-button ym-delete\">Delete</a>";
-					print "<a rel=\"nofollow\" href=\"download.php?repository=".$repository."&dataset=".$file."\" class=\"ym-button ym-play\">Download</a>";
+					print "<td><a rel=\"nofollow\" href=\"files.php?dataset=".$file."\" class=\"ym-button ym-primary ym-next\">Select</a><br />";
+					print "<a rel=\"nofollow\" href=\"edit.php?repository=".$repository."&dataset=".$file."\" class=\"ym-button ym-edit\">Edit</a><br />";
+					print "<a rel=\"nofollow\" href=\"download.php?repository=".$repository."&dataset=".$file."\" class=\"ym-button ym-play\">Download</a><br />";
+					print "<a rel=\"nofollow\" href=\"files.php?delete=".md5($file)."\" class=\"ym-button ym-danger ym-delete\">Delete</a>";
 					print "</td></tr>\n";
 				} else {
-					print "<td><a rel=\"nofollow\" href=\"files.php?dataset=".$dataset."&delete=".md5($file)."\" class=\"ym-button ym-delete\">Delete</a></td></tr>\n";
+					print "<td>";
+					print "<a rel=\"nofollow\" href=\"files.php?dataset=".$dataset."&delete=".md5($file)."\" class=\"ym-button ym-delete ym-danger\">Delete</a>";
+					if (strtolower(substr($file,-4,4))==".xml") {
+						print "<br /><a rel=\"nofollow\" href=\"arcgis.php?repository=".$repository."&dataset=".$dataset."&metadata=".$file."\" class=\"ym-button ym-play\">Import XML</a>\n";
+					}
+					if (strtolower(substr($file,-4,4))==".txt") {
+						print "<br /><a rel=\"nofollow\" href=\"metatext.php?repository=".$repository."&dataset=".$dataset."&metadata=".$file."\" class=\"ym-button ym-play\">Import TXT</a>\n";
+					}
+					print "</td></tr>\n";
 				}
 				
 			}

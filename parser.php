@@ -7,6 +7,7 @@
 //	purpose: 	called with loaded $xml object for parsing required information for our attributes
 //				deletes old metadata record and create a new with those attributes
 //
+//	called by:	arcgis.php, sync.php, harvest.php
 //
 
 require_once "area.php";
@@ -329,10 +330,10 @@ $format=mysql_real_escape_string($format);
 $thumbnail=(string)$xml->Binary->Thumbnail->Data;
 if ($thumbnail!="") {
   $thumbdata=base64_decode($thumbnail,false);
-  $handle=fopen("./files/".$md5file.".bmp",'w');
+  $handle=fopen("./files/".$dataset.".bmp",'w');
   fwrite($handle,$thumbdata);
   fclose($handle);
-  $thumbnail=$domainroot."files/".$md5file.".bmp";
+  $thumbnail=$domainroot."files/".$dataset.".bmp";
 } else {
   // iso also knows thumbnails, but implementations like geonetwork doesn't supply a http-path
   $thumbnail=(string)$xml->gmd_identificationInfo->gmd_MD_DataIdentification->gmd_graphicOverview->gmd_MD_BrowseGraphic->gmd_fileName->gco_CharacterString;
@@ -344,13 +345,14 @@ if (($metaid!="") && ($area>0)){ // only insert metadata with co-ordinates and m
 	$username=mysql_real_escape_string($_SESSION['username']);
 	$sql="INSERT INTO metadata (id, uuid, peer_id, title, pubdate, moddate, abstract, purpose, individual, category, format, organisation, city, keywords, denominator, thumbnail, uselimitation, westbc, southbc, eastbc, northbc, area, linkage, source, wms, grs, username) VALUES ('', '".$metaid."',".$peer.", '".$title."', '".$pubdate."', '".$moddate."', '".$abstract."', '".$purpose."', '".$individual."', '".$category."', '".$format."', '".$origin."', '".$city."', '".$keywords."', '".$denominator."', '".$thumbnail."', '".$useconst."', ".$westbc.", ".$southbc.", ".$eastbc.", ".$northbc.", ".$area.", '".$linkage."', '".$dateiname."', '".$wms."', '".$grs."', '".$username."')";
 	$results = mysql_query($sql);  
-	print "<tr>";
-} else print "<tr bgcolor=yellow>"; // if not added.
-
+/*
+	 print "<tr>";
+}  else print "<tr bgcolor=yellow>"; // if not added.
 // give some output in table form
 print "<td><b>".basename($dateiname)."</b></td>";
 print "<td><a href=\"files.php?dataset=".$dataset."\">".$dataset."</a></td>";
 print "<td><a target=\"_blank\" href=\"details.php?uuid=".$metaid."\">".$metaid."</a></td>";
 print "<td>".$area."</td></tr>";
-
+*/
+}
 ?>

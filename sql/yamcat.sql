@@ -92,6 +92,7 @@ CREATE TABLE IF NOT EXISTS `metadata` (
   `username` varchar(32) NOT NULL,
   `dataset` varchar(255) NOT NULL,
   `status` int(11) NOT NULL,
+  `guest` char(1) NOT NULL,
   UNIQUE KEY `id` (`id`),
   FULLTEXT KEY `fulltextindex` (`title`,`abstract`,`purpose`,`keywords`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ;
@@ -156,7 +157,8 @@ INSERT INTO `popups` (`id`, `lang`, `topic`, `popup`) VALUES
 (17, 'en', 'uselimitation', 'Please state license conditions and usage limitations here. Under which license has this data or paper been published, is it a free license like Creative Commons or is it copyrighted material?'),
 (18, 'en', 'format', 'ISO 19139 knows several terms for content classification. This set is extended here by some mir values. This field should be filled automatically when submitting a website or harvesting metadata, it is not required to fill it out by hand.'),
 (19, 'en', 'linkage', 'This is a very important general pupose field for linkage to external ressources. All fields in ISO 19139 with external links are combined in the single one to simplify your life. It may be a download link, a link to a website or a link for use in a client for WMS or WFS.'),
-(20, 'en', 'thumbnail', 'Thumbnails give a preview of the content. An URL to a thumbnail may be entered here, however when harvesting metadata it is extracted from the metadata automatically. Websites appear whith a thumbnail later using the WebSnapr service.');
+(20, 'en', 'public', 'This dataset can be downloaded by users not logged in.'),
+(21, 'en', 'thumbnail', 'Thumbnails give a preview of the content. An URL to a thumbnail may be entered here, however when harvesting metadata it is extracted from the metadata automatically. Websites appear whith a thumbnail later using the WebSnapr service.');
 
 -- --------------------------------------------------------
 

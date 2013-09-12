@@ -2,6 +2,7 @@
 include "conf/config.php";
 require_once "dbauth.php";
 require_once "bbcode.php";
+require_once "phpmailer.php";								// is already loaded with dbauth
 $username=$_SESSION['username'];
 if ($username!='admin') die();
 
@@ -24,13 +25,19 @@ $name="";
 $action="";
 if (isset($_REQUEST['name'])) $name=mysql_real_escape_string($_REQUEST['name']);
 if (isset($_REQUEST['email'])) $email=mysql_real_escape_string($_REQUEST['email']);
+if (isset($_REQUEST['password'])) $password=mysql_real_escape_string($_REQUEST['password']);
 if (($name!="") && ($email!="")) {
-  $sql = "INSERT INTO `users` (`username`, `email`) VALUES ('".$name."', '".$email."');"; 
-  $result = mysql_query($sql);
-  if (!$result) {
-    echo "Konnte Abfrage ($sql) nicht erfolgreich ausführen von DB: " . mysql_error();
-    exit;
-  }
+	$sql = "INSERT INTO `users` (`username`, `password`, `email`) VALUES ('".$name."', '".sha1($password)."', '".$email."');"; 
+	$result = mysql_query($sql);
+	if (!$result) {
+		echo "Konnte Abfrage ($sql) nicht erfolgreich ausführen von DB: " . mysql_error();
+		exit;
+	} else {
+		$subject="Account created on $subtitle!";
+		$message=$subject."\n\nServer: ".$domainroot."\n\nUsername: ".$name."\n\nPassword: ".$password."\n\n";
+		print "<pre>".$message."</pre>\n";
+		print "<h3>".phpmail($email,$name,$subject,$message)."</h3>\n";
+	}
 }
 
 // delete user with records?
@@ -85,8 +92,12 @@ Add new user
 </h3>
 <form class="ym-form" action="users.php" method="post">
 <div class="ym-fbox-text">
-<label for="name">Name</label></td>
+<label for="name">Username</label></td>
 <input name="name" maxlength="100" type="text" >
+</div>
+<div class="ym-fbox-text">
+<label for="password">Password</label></td>
+<input name="password" value="<?php print substr(str_shuffle(md5(time())),0,8); ?>" maxlength="255" type="text" >
 </div>
 <div class="ym-fbox-text">
 <label for="email">eMail</label></td>

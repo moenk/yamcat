@@ -1,0 +1,2 @@
+identifier,title,date,description,subject,keywords,publisher,rights,format,denominator,west,southbc,east,north,source,grs
+d7b0d16e-6589-4790-a3c7-1234567890ab,demo metadata,2013-08-08,demonstration of metadata,show how metadata in CSV could be like,"demo, data, yamcat",moenk,public domain,shapefile,5000,12,52,13,53,http://www.moenk.de,EPSG:4326

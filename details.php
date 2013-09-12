@@ -32,7 +32,7 @@ $linkage=trim($row["linkage"]);
 if (strlen($title)>40) $title=substr($title,0,40)."...";
 $title = htmlspecialchars($title);
 $subtitle=htmlspecialchars(stripslashes($row["name"]));
-if ($subtitle=="") $subtitle=$row["category"];
+if ($subtitle=="") $subtitle=$row["format"]." ".$row["category"]." ".$row["username"];
 
 include("header.php");
 include("navigation.php");
@@ -120,28 +120,30 @@ $grs=trim($row["grs"]);
 	 
 // actionblock only if user is logged in
 if ($username!="") {
-	print "<h3>Action</h3>";
-	// WMS available? Then you can see a "preview" what is a really good wms client indeed
-	if ($wms!="") {
+	print "<h3>Action</h3><p>";
+	// This is a WMS service? Then give a preview button...
+	if ($format=="service") {
 		print "<a rel=\"nofollow\" class=\"ym-button ym-play\" href=\"wms.php?url=".urlencode($wms)."&bbox=".$bbox."&grs=".$grs."\">Preview</a>\n";
-	}
-	// A dataset to download?
-	if ($dataset!="") {
-		print "<a rel=\"nofollow\" class=\"ym-button ym-play\" href=\"download.php?repository=".$owner."&dataset=".$dataset."\">Download</a>\n";
-	}
+	} else 
 	// show link to website? (iso19139 names it information, website is if metadata form website)
 	if (($format=="website") or ($format=="information")) {
 		print "<a rel=\"nofollow\" target=\"_blank\" class=\"ym-button ym-play\" href=\"".$linkage."\">Website</a>\n";
-	}
+	} else
+	// or a newsfeed?
 	if ($format=="newsfeed") {
 		print "<a class=\"ym-button ym-play\" href=\"news.php?uuid=".$uuid."\">News</a>\n";
-	}
+	} else
+	// A dataset to download!
+	print "<a rel=\"nofollow\" class=\"ym-button ym-play\" href=\"".$linkage."\">Download</a>\n";
 	// Edit buttion if owner or admin, and: it is not automatic created by sync
 	if ((($username==$owner) or ($username=="admin")) and (($dataset=="") or ($format="Download"))) {
 		print "<a rel=\"nofollow\" href=\"edit.php?id=".$id."\" class=\"ym-button ym-edit\">Edit</a>";
-		print "<a rel=\"nofollow\" href=\"delete.php?id=".$id."\" class=\"ym-button ym-delete\">Delete</a>";
-		if ($format=="service") print "<a rel=\"nofollow\" href=\"add_service.php?url=".rawurlencode($wms)."\" class=\"ym-button ym-star\">Refresh</a>";
+		print "<a rel=\"nofollow\" href=\"delete.php?id=".$id."\" class=\"ym-button ym-danger ym-delete\">Delete</a>";
+		if ($format=="service") {
+			print "<a rel=\"nofollow\" href=\"add_service.php?url=".rawurlencode($linkage)."\" class=\"ym-button ym-star\">Refresh</a>";
+		}
 	}
+	print "</p>\n";
 }
 ?>
 <h3>
@@ -206,14 +208,12 @@ if (substr($grs,0,5)=="EPSG:") {
 }
 print "<tr><td width=\"38%\">GRS</td><td>".$grs."</td></tr>\n";
 
-if ($username!="") {
-	print "<tr><td>Linkage</td><td>";
-	$linkages=explode(" ",$row["linkage"]);
-	foreach ($linkages as $linkage) {
-		print make_clickable($linkage)."<br>";
-	}
-	print "</td></tr>\n";
+print "<tr><td>Linkage</td><td>";
+$linkages=explode(" ",$row["linkage"]);
+foreach ($linkages as $linkage) {
+	print make_clickable($linkage)."<br>";
 }
+print "</td></tr>\n";
 
 $source = trim(stripslashes($row["source"]));
 // print "<tr><td>Metadata</td><td><a href=\"".$domainroot.$source."\">".basename($source)."</a></td></tr>\n";

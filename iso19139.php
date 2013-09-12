@@ -6,7 +6,7 @@
 //
 //	purpose: forms string $sql from metadata array in $row
 //
-//	caller: export.php
+//	caller: export.php, update.php
 //
 
 $xml='<?xml version="1.0" encoding="UTF-8"?>
@@ -29,16 +29,17 @@ $xml='<?xml version="1.0" encoding="UTF-8"?>
   <gmd:contact>
       <gmd:CI_ResponsibleParty>
          <gmd:individualName>
-            <gco:CharacterString>'.$row['name'].' '.$row['surname'].'</gco:CharacterString>
+            <gco:CharacterString>'.$row['meta_name'].' '.$row['meta_surname'].'</gco:CharacterString>
          </gmd:individualName>
          <gmd:organisationName>
-            <gco:CharacterString>test meta orga</gco:CharacterString>
+            <gco:CharacterString>'.$row['meta_organisation'].'</gco:CharacterString>
          </gmd:organisationName>
          <gmd:positionName>
-            <gco:CharacterString>'.$row['editor'].'</gco:CharacterString>
+            <gco:CharacterString>'.$row['meta_profile'].'</gco:CharacterString>
          </gmd:positionName>
          <gmd:contactInfo>
             <gmd:CI_Contact>
+<!--
                <gmd:phone>
                   <gmd:CI_Telephone>
                      <gmd:voice>
@@ -49,25 +50,30 @@ $xml='<?xml version="1.0" encoding="UTF-8"?>
                      </gmd:facsimile>
                   </gmd:CI_Telephone>
                </gmd:phone>
+-->
                <gmd:address>
                   <gmd:CI_Address>
+<!--
                      <gmd:deliveryPoint>
                         <gco:CharacterString>test meta delivery</gco:CharacterString>
                      </gmd:deliveryPoint>
+-->
                      <gmd:city>
-                        <gco:CharacterString>test meta city</gco:CharacterString>
+                        <gco:CharacterString>'.$row['meta_city'].'</gco:CharacterString>
                      </gmd:city>
+<!--
                      <gmd:administrativeArea>
                         <gco:CharacterString>test meta admin</gco:CharacterString>
                      </gmd:administrativeArea>
+-->
                      <gmd:postalCode>
-                        <gco:CharacterString>'.$row['zip'].'</gco:CharacterString>
+                        <gco:CharacterString>'.$row['meta_zip'].'</gco:CharacterString>
                      </gmd:postalCode>
                      <gmd:country>
-                        <gco:CharacterString>'.$row['country'].'</gco:CharacterString>
+                        <gco:CharacterString>'.$row['meta_country'].'</gco:CharacterString>
                      </gmd:country>
                      <gmd:electronicMailAddress>
-                        <gco:CharacterString>'.$row['email'].'</gco:CharacterString>
+                        <gco:CharacterString>'.$row['meta_email'].'</gco:CharacterString>
                      </gmd:electronicMailAddress>
                   </gmd:CI_Address>
                </gmd:address>
@@ -80,7 +86,7 @@ $xml='<?xml version="1.0" encoding="UTF-8"?>
       </gmd:CI_ResponsibleParty>
   </gmd:contact>
   <gmd:dateStamp>
-      <gco:DateTime>'.date("Y-m-d\TH:i:s").'</gco:DateTime>
+      <gco:DateTime>'.date("Y-m-d\TH:i:s",strtotime($row['moddate'])).'</gco:DateTime>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
       <gco:CharacterString>ISO 19115:2003/19139</gco:CharacterString>
@@ -124,10 +130,10 @@ $xml='<?xml version="1.0" encoding="UTF-8"?>
             </gmd:CI_Citation>
          </gmd:citation>
          <gmd:abstract>
-            <gco:CharacterString>'.$row['abstract'].'</gco:CharacterString>
+            <gco:CharacterString>'.htmlspecialchars($row['abstract'], ENT_QUOTES | "ENT_XML1", "UTF-8").'</gco:CharacterString>
          </gmd:abstract>
          <gmd:purpose>
-            <gco:CharacterString>'.$row['purpose'].'</gco:CharacterString>
+            <gco:CharacterString>'.htmlspecialchars($row['purpose'], ENT_QUOTES | "ENT_XML1", "UTF-8").'</gco:CharacterString>
          </gmd:purpose>
          <gmd:status>
             <gmd:MD_ProgressCode codeListValue="onGoing"
@@ -143,6 +149,7 @@ $xml='<?xml version="1.0" encoding="UTF-8"?>
                </gmd:organisationName>
                <gmd:contactInfo>
                   <gmd:CI_Contact>
+<!--
                      <gmd:phone>
                         <gmd:CI_Telephone>
                            <gmd:voice>
@@ -153,14 +160,16 @@ $xml='<?xml version="1.0" encoding="UTF-8"?>
                            </gmd:facsimile>
                         </gmd:CI_Telephone>
                      </gmd:phone>
+-->
                      <gmd:address>
                         <gmd:CI_Address>
-                           <gmd:deliveryPoint>
-                              <gco:CharacterString>test org del</gco:CharacterString>
-                           </gmd:deliveryPoint>
                            <gmd:city>
                               <gco:CharacterString>'.$row['city'].'</gco:CharacterString>
                            </gmd:city>
+<!--
+                           <gmd:deliveryPoint>
+                              <gco:CharacterString>test org del</gco:CharacterString>
+                           </gmd:deliveryPoint>
                            <gmd:administrativeArea>
                               <gco:CharacterString>test org area</gco:CharacterString>
                            </gmd:administrativeArea>
@@ -170,8 +179,9 @@ $xml='<?xml version="1.0" encoding="UTF-8"?>
                            <gmd:country>
                               <gco:CharacterString>test org country</gco:CharacterString>
                            </gmd:country>
+-->
                            <gmd:electronicMailAddress>
-                              <gco:CharacterString>test@org.email</gco:CharacterString>
+                              <gco:CharacterString>'.$row['email'].'</gco:CharacterString>
                            </gmd:electronicMailAddress>
                         </gmd:CI_Address>
                      </gmd:address>
@@ -194,7 +204,7 @@ $xml='<?xml version="1.0" encoding="UTF-8"?>
          <gmd:graphicOverview>
             <gmd:MD_BrowseGraphic>
                <gmd:fileName>
-                  <gco:CharacterString>'.$row['thumbnail'].'</gco:CharacterString>
+                  <gco:CharacterString>'.htmlspecialchars($row['thumbnail'], ENT_QUOTES | "ENT_XML1", "UTF-8").'</gco:CharacterString>
                </gmd:fileName>
                <gmd:fileDescription>
                   <gco:CharacterString>thumbnail</gco:CharacterString>
@@ -282,38 +292,10 @@ $xml='<?xml version="1.0" encoding="UTF-8"?>
       <gmd:MD_Distribution>
          <gmd:transferOptions>
             <gmd:MD_DigitalTransferOptions>
-               <gmd:onLine>
-                  <gmd:CI_OnlineResource>
-                     <gmd:linkage>
-                        <gmd:URL>test www</gmd:URL>
-                     </gmd:linkage>
-                     <gmd:protocol>
-                        <gco:CharacterString>WWW:LINK-1.0-http--link</gco:CharacterString>
-                     </gmd:protocol>
-                     <gmd:name gco:nilReason="missing">
-                        <gco:CharacterString/>
-                     </gmd:name>
-                     <gmd:description gco:nilReason="missing">
-                        <gco:CharacterString/>
-                     </gmd:description>
-                  </gmd:CI_OnlineResource>
-               </gmd:onLine>
-               <gmd:onLine>
-                  <gmd:CI_OnlineResource>
-                     <gmd:linkage>
-                        <gmd:URL>http://gdi.carbiocial.de:8080/geonetwork/srv/en/resources.get?uuid=e4c1bd4e-1d53-4116-8aed-d74cfb3bfa9b&amp;fname=&amp;access=private</gmd:URL>
-                     </gmd:linkage>
-                     <gmd:protocol>
-                        <gco:CharacterString>WWW:DOWNLOAD-1.0-http--download</gco:CharacterString>
-                     </gmd:protocol>
-                     <gmd:name>
-                        <gmx:MimeFileType xmlns:gmx="http://www.isotc211.org/2005/gmx" type=""/>
-                     </gmd:name>
-                     <gmd:description>
-                        <gco:CharacterString/>
-                     </gmd:description>
-                  </gmd:CI_OnlineResource>
-               </gmd:onLine>
+';
+
+if (strtolower($row['format'])=='service') {
+	$xml.='
                <gmd:onLine>
                   <gmd:CI_OnlineResource>
                      <gmd:linkage>
@@ -330,7 +312,49 @@ $xml='<?xml version="1.0" encoding="UTF-8"?>
                      </gmd:description>
                   </gmd:CI_OnlineResource>
                </gmd:onLine>
-            </gmd:MD_DigitalTransferOptions>
+	';
+} else if (strtolower($row['format'])=='website') {
+	$xml.='
+               <gmd:onLine>
+                  <gmd:CI_OnlineResource>
+                     <gmd:linkage>
+                        <gmd:URL>'.htmlspecialchars($row['linkage'], ENT_QUOTES | "ENT_XML1", "UTF-8").'</gmd:URL>
+                     </gmd:linkage>
+                     <gmd:protocol>
+                        <gco:CharacterString>WWW:LINK-1.0-http--link</gco:CharacterString>
+                     </gmd:protocol>
+                     <gmd:name gco:nilReason="missing">
+                        <gco:CharacterString/>
+                     </gmd:name>
+                     <gmd:description gco:nilReason="missing">
+                        <gco:CharacterString/>
+                     </gmd:description>
+                  </gmd:CI_OnlineResource>
+               </gmd:onLine>
+	';
+} else {
+	$xml.='
+               <gmd:onLine>
+                  <gmd:CI_OnlineResource>
+                     <gmd:linkage>
+                        <gmd:URL>'.htmlspecialchars($row['linkage'], ENT_QUOTES | "ENT_XML1", "UTF-8").'</gmd:URL>
+					 </gmd:linkage>
+                     <gmd:protocol>
+                        <gco:CharacterString>WWW:DOWNLOAD-1.0-http--download</gco:CharacterString>
+                     </gmd:protocol>
+                     <gmd:name>
+                        <gmx:MimeFileType xmlns:gmx="http://www.isotc211.org/2005/gmx" type=""/>
+                     </gmd:name>
+                     <gmd:description>
+                        <gco:CharacterString/>
+                     </gmd:description>
+                  </gmd:CI_OnlineResource>
+               </gmd:onLine>
+	';
+}
+
+$xml.='
+			   </gmd:MD_DigitalTransferOptions>
          </gmd:transferOptions>
       </gmd:MD_Distribution>
   </gmd:distributionInfo>

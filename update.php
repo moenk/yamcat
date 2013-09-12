@@ -1,4 +1,13 @@
 <?php
+//
+//	file: 		update.php
+//
+//	coder: 		moenk
+//
+//	purpose: 	updates a metadata record after editing
+//				also writes new metadata.xml in dataset 
+//
+
 include "conf/config.php";
 include "dbauth.php";
 include("connect.php");
@@ -54,13 +63,11 @@ $format = trim(mysql_real_escape_string($_POST["format"]));
 $grs = trim(mysql_real_escape_string($_POST["grs"]));
 
 if (($username==$owner) or ($username=="admin")) {
-	// update only fields user are allowed to change, no uuid, no owner!
+	// update only fields users are allowed to change, no uuid, no owner!
 	$sql="UPDATE metadata SET title = '$title', pubdate = '$pubdate', moddate = '$moddate', category = '$category', abstract = '$abstract', purpose = '$purpose',  individual = '$individual',  email = '$email', organisation = '$organisation', city = '$city', keywords = '$keywords', denominator = '$denominator',  thumbnail = '$thumbnail', uselimitation = '$uselimitation', westbc = '$westbc', southbc = '$southbc', eastbc = '$eastbc', northbc = '$northbc',area = '$area', linkage = '$linkage', grs = '$grs', format = '$format' WHERE id = '$id' ";
 	$result = mysql_query($sql);
-
 	if($result) { 
-		echo "<p>Successfully updated.</p>"; 
-		print "<p><a href=\"details.php?uuid=".$uuid."\" class=\"ym-button ym-next\">View metadata record</a></p>";
+		echo "<p>Successfully updated metadata record.</p>"; 
 	} else { 
 		die('<p>Invalid query: '.mysql_error()."</p>"); 
 	}
@@ -68,6 +75,21 @@ if (($username==$owner) or ($username=="admin")) {
 	print "<p>You (".$username.") are not the owner (".$owner.") of this record.</p>";
 }
 
+// update file metadata.xml in repository if dataset is provided
+$sql="select * from metadata where uuid='".$uuid."';";
+$result = mysql_query($sql);
+$row = mysql_fetch_assoc($result);
+$metadatafile=$geodatapath.$row['username']."/".$row['dataset']."/metadata.xml";
+if ($row['dataset']!="") {
+	print "<p>Updating metadata file: ".$metadatafile." ... ";
+	include "iso19139.php";
+	$handle = fopen($metadatafile, "w");
+	fwrite($handle,$xml);
+	fclose($handle);
+	print "done.</p>";
+}
+
+print "<p><a href=\"details.php?uuid=".$uuid."\" class=\"ym-button ym-next\">View metadata record</a></p>";
 include("main2.php");
 include "footer.php";
 ?>
